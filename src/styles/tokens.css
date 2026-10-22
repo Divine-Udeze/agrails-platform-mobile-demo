@@ -1,0 +1,57 @@
+:root {
+  /* Brand */
+  --green-900: #0f3d21;
+  --green-700: #1f6b3a;
+  --green-500: #2f9e5a;
+  --green-300: #8fd3a5;
+  --green-100: #e3f5e8;
+  --soil-700: #6b4423;
+  --soil-500: #96643a;
+  --soil-100: #f4ece3;
+  --gold-500: #e0a526;
+  --gold-100: #fdf3dc;
+  --rain-600: #1f6fb5;
+  --rain-400: #4a9be0;
+  --rain-100: #e2effb;
+
+  /* Status */
+  --good: #2f9e5a;
+  --good-bg: #e3f5e8;
+  --warning: #c77700;
+  --warning-bg: #fff1d6;
+  --danger: #c62828;
+  --danger-bg: #fde4e4;
+
+  /* Neutrals */
+  --ink: #17201a;
+  --ink-2: #44514a;
+  --ink-3: #6b7770;
+  --line: #dfe5e1;
+  --surface: #ffffff;
+  --bg: #f5f7f4;
+
+  /* Type */
+  --font: system-ui, -apple-system, 'Segoe UI', Roboto, 'Noto Sans', sans-serif;
+  --fs-xs: 13px;
+  --fs-sm: 14px;
+  --fs-md: 16px;
+  --fs-lg: 19px;
+  --fs-xl: 24px;
+  --fs-2xl: 30px;
+  --fs-3xl: 38px;
+
+  /* Space & shape */
+  --sp-1: 4px;
+  --sp-2: 8px;
+  --sp-3: 12px;
+  --sp-4: 16px;
+  --sp-5: 24px;
+  --sp-6: 32px;
+  --radius: 14px;
+  --radius-lg: 22px;
+  --radius-pill: 999px;
+  --shadow: 0 1px 2px rgba(15, 61, 33, 0.06), 0 4px 14px rgba(15, 61, 33, 0.08);
+  --tap: 48px;
+  --nav-h: 64px;
+  --ease: cubic-bezier(0.2, 0.8, 0.2, 1);
+}
