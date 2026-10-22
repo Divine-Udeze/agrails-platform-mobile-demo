@@ -1,0 +1,28 @@
+export const en = {
+  'app.name': 'Agrails',
+  'common.hello': 'Hello, {name}',
+  'common.continue': 'Continue',
+  'common.back': 'Back',
+  'common.retry': 'Try again',
+  'common.cancel': 'Cancel',
+  'common.save': 'Save',
+  'common.loading': 'Loading…',
+  'common.seeAll': 'See all',
+  'common.goHome': 'Go to home',
+  'crop.maize': 'Maize',
+  'crop.beans': 'Beans',
+  'crop.tea': 'Tea',
+  'season.long_rains': 'Long rains (Mar–Jul)',
+  'season.short_rains': 'Short rains (Oct–Dec)',
+  'risk.low': 'Low risk',
+  'risk.medium': 'Medium risk',
+  'risk.high': 'High risk',
+  'plan.basic': 'Basic',
+  'plan.standard': 'Standard',
+  'plan.premium': 'Premium',
+  'status.good': 'Good',
+  'status.warning': 'Watch',
+  'status.danger': 'Alert',
+}
+
+export type StringKey = keyof typeof en
