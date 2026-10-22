@@ -1,0 +1,128 @@
+.chart {
+  position: relative;
+  width: 100%;
+}
+
+.svg {
+  width: 100%;
+  height: auto;
+  overflow: visible;
+  touch-action: pan-y;
+}
+
+.good {
+  color: var(--good);
+}
+.warning {
+  color: var(--warning);
+}
+.danger {
+  color: var(--danger);
+}
+
+.gridLine {
+  stroke: var(--line);
+  stroke-width: 1;
+}
+
+.axisText {
+  fill: var(--ink-3);
+  font-size: 12px;
+}
+
+.refText {
+  fill: var(--ink-2);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.ring {
+  position: relative;
+  flex: none;
+}
+.ringCenter {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  line-height: 1.1;
+}
+.ringLabel {
+  font-weight: 800;
+  font-size: var(--fs-xl);
+}
+.ringSub {
+  font-size: var(--fs-xs);
+  color: var(--ink-3);
+}
+
+.donut {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-4);
+}
+.legend {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: var(--sp-2);
+  flex: 1;
+}
+.legendRow {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  font-size: var(--fs-sm);
+}
+.legendRow strong {
+  margin-left: auto;
+}
+.swatch {
+  width: 12px;
+  height: 12px;
+  border-radius: 4px;
+  flex: none;
+}
+
+.gauge {
+  text-align: center;
+}
+.needle {
+  transition: transform 600ms var(--ease);
+}
+.gaugeValue {
+  font-size: var(--fs-2xl);
+  font-weight: 800;
+  margin-top: calc(-1 * var(--sp-5));
+}
+.gaugeEnds {
+  display: flex;
+  justify-content: space-between;
+  font-size: var(--fs-xs);
+  color: var(--ink-3);
+  padding: 0 var(--sp-2);
+}
+
+.tooltip {
+  position: absolute;
+  top: 0;
+  transform: translateX(-50%);
+  background: var(--ink);
+  color: #fff;
+  border-radius: 10px;
+  padding: 6px 10px;
+  font-size: var(--fs-sm);
+  white-space: nowrap;
+  pointer-events: none;
+  display: flex;
+  gap: var(--sp-2);
+}
+
+.hit {
+  fill: transparent;
+  cursor: pointer;
+}
