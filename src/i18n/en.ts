@@ -33,6 +33,26 @@ export const en = {
   'ndvi.healthy': 'Healthy',
   'ndvi.stressed': 'Stressed',
   'ndvi.poor': 'Poor',
+  'common.close': 'Close',
+  'nav.home': 'Home',
+  'nav.monitor': 'Monitor',
+  'nav.map': 'Map',
+  'nav.payouts': 'Payouts',
+  'nav.profile': 'Profile',
+  'nav.newPayout': 'New payout',
+  'error.offline.title': "You're offline",
+  'error.offline.body':
+    'Maps need mobile data. Check your connection and try again.',
+  'error.gps.title': "We can't find your location",
+  'error.gps.body':
+    'Turn on location (GPS), or mark your farm by tapping its corners on the map instead.',
+  'error.payment.title': 'Payment did not go through',
+  'error.payment.body':
+    'No money was taken. Check your M-Pesa balance and try again.',
+  'error.notFound.title': "We couldn't find that page",
+  'error.notFound.body': 'It may have been removed, or the link is wrong.',
+  'error.generic.title': 'Something went wrong',
+  'error.generic.body': 'Please try again.',
 }
 
 export type StringKey = keyof typeof en
