@@ -53,6 +53,7 @@ export const en = {
   'error.notFound.body': 'It may have been removed, or the link is wrong.',
   'error.generic.title': 'Something went wrong',
   'error.generic.body': 'Please try again.',
+  'notFound.cta': 'Go to home',
 }
 
 export type StringKey = keyof typeof en

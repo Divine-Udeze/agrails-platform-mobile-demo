@@ -23,3 +23,5 @@ if (!window.matchMedia) {
       dispatchEvent: () => false,
     }) as MediaQueryList
 }
+
+window.scrollTo = (() => {}) as typeof window.scrollTo
