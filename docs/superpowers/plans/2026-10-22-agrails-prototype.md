@@ -38,20 +38,16 @@
 
 ## Schedule
 
-Eight working days. Days run in order (later tasks use what earlier days build). Each day ends with `npm test` green, everything committed, and something you can check.
+Four days, Thursday 22 Oct to Sunday 25 Oct 2026, ready **Monday 26 Oct morning**. Days run in order (later tasks use what earlier days build). Each day ends with `npm test` green, everything committed, and something you can check.
 
 | Day | Tasks | Theme | End-of-day check |
 | --- | --- | --- | --- |
-| 1 | 1, 2, 3 | Foundations | `npm run dev` shows the shell; types, config, i18n, format and validation tests pass |
-| 2 | 4, 5, 6, 7 | Business rules and mock data | Area, pricing, payout, health and yield maths all tested; seeded farmer has 3 farms telling different stories |
-| 3 | 8, 9, 10, 11 | State, services, charts | State survives reload; mock OTP/M-Pesa work in tests; all 7 chart components render with tap-to-inspect |
-| 4 | 12, 13, 14 | UI kit, routing, onboarding | In the browser: Welcome → phone → OTP `123456` → Home (seeded) or Registration (new number) |
-| 5 | 15, 16, 17 | Home, farms, first map | Dashboard with ring, alert and farm cards; add-farm steps; tap corners on real satellite map |
-| 6 | 18, 19, 20, 21 | Boundaries, yield, quote | GPS walk and finger draw; save farm; yield risk gauge; plan options and premium quote |
-| 7 | 22, 23, 24 | Payment, monitoring, map | Full purchase with pulsing M-Pesa screen and certificate; 4 health tabs; all-farms map |
-| 8 | 25, 26, 27 | Payouts, profile, ship | Payout celebration and timeline; profile and policies; Android build passes the manual QA checklist |
+| Thu 22 Oct | 1–8 | Foundations, business rules, mock data, app state | Shell runs; area, pricing, payout, health and yield maths tested; seeded farmer has 3 farms; state survives reload |
+| Fri 23 Oct | 9–14 | Services, charts, UI kit, routing, onboarding | All 7 charts render; in the browser: Welcome → phone → OTP `123456` → Home or Registration |
+| Sat 24 Oct | 15–20 | Home, farms, all boundary methods, yield | Dashboard; add farm; tap/quick/walk/draw boundary on satellite map; save farm; yield risk gauge |
+| Sun 25 Oct | 21–27 | Insurance, payment, monitoring, map, payouts, profile, ship | Full M-Pesa purchase to certificate; 4 health tabs; farms map; payouts; profile; Android build passes the QA checklist |
 
-Heaviest days are 6 and 7 (map interactions, payment states, four chart tabs). If a day slips, carry the unfinished task to the start of the next day rather than skipping ahead; nothing on a later day works without it.
+Saturday and Sunday are the heaviest days. If Sunday afternoon is behind, cut in this order (each is self-contained and can follow next week): the iOS shell (keep Android), the finger-draw boundary method (Task 18, draw half), the harvest report page (Task 20, `YieldReport`), the Help sheet on Profile. Never skip a task that a later task builds on; carry it over instead.
 
 ---
 
