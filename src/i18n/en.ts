@@ -23,6 +23,16 @@ export const en = {
   'status.good': 'Good',
   'status.warning': 'Watch',
   'status.danger': 'Alert',
+  'spi.extremeDrought': 'Extreme drought',
+  'spi.severeDrought': 'Severe drought',
+  'spi.moderateDrought': 'Moderate drought',
+  'spi.normal': 'Near normal',
+  'spi.moderatelyWet': 'Moderately wet',
+  'spi.veryWet': 'Very wet',
+  'spi.extremelyWet': 'Extremely wet',
+  'ndvi.healthy': 'Healthy',
+  'ndvi.stressed': 'Stressed',
+  'ndvi.poor': 'Poor',
 }
 
 export type StringKey = keyof typeof en
