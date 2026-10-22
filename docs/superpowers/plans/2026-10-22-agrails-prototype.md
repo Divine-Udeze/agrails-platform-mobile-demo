@@ -25,7 +25,8 @@
 - `localStorage` keys: `agrails_auth` (auth) and `agrails_state` (farmer, farms, policies, payouts). Every access wrapped in try/catch.
 - Initial JS ≤ 150 KB gzipped (checked by `npm run check:bundle`).
 - Import alias: `@` = project root, so imports look like `@/src/utils/format`.
-- Mock behaviour: OTP code `123456`; seeded returning farmer `+254712345678`; M-Pesa numbers ending in `0` fail, ending in `9` time out (after 60 s), all others succeed after ~4 s.
+- Mock behaviour: OTP code `123456`; three existing policyholders — Wanjiru Kamau `+254712345678` / ID `28765431` / `AGR-2026-004417`, Kipkoech Langat `+254722111222` / ID `31234567` / `AGR-2025-007731` (expired), Achieng Otieno `+254733444555` / ID `29876543` / `AGR-2026-003150` (payout sent); M-Pesa numbers ending in `0` fail, ending in `9` time out (after 60 s), all others succeed after ~4 s.
+- Existing policyholders sign in by phone, policy number or national ID; lookup always ends in an OTP to the phone on file, shown masked (`+254 7•• ••• 678`); the not-found message is identical for both lookup types.
 - Tests live next to the code as `*.test.ts` / `*.test.tsx`; run with `npm test`.
 
 ## Review Focus
@@ -43,7 +44,7 @@ Four days, Thursday 22 Oct to Sunday 25 Oct 2026, ready **Monday 26 Oct morning*
 | Day | Tasks | Theme | End-of-day check |
 | --- | --- | --- | --- |
 | Thu 22 Oct | 1–8 | Foundations, business rules, mock data, app state | Shell runs; area, pricing, payout, health and yield maths tested; seeded farmer has 3 farms; state survives reload |
-| Fri 23 Oct | 9–14 | Services, charts, UI kit, routing, onboarding | All 7 charts render; in the browser: Welcome → phone → OTP `123456` → Home or Registration |
+| Fri 23 Oct | 9–14 | Services, charts, UI kit, routing, onboarding (incl. policyholder lookup) | All 7 charts render; in the browser: Welcome → phone → OTP `123456` → Home or Registration; "I already have a policy" → policy number or ID → masked-phone OTP → that farmer's Home |
 | Sat 24 Oct | 15–20 | Home, farms, all boundary methods, yield | Dashboard; add farm; tap/quick/walk/draw boundary on satellite map; save farm; yield risk gauge |
 | Sun 25 Oct | 21–27 | Insurance, payment, monitoring, map, payouts, profile, ship | Full M-Pesa purchase to certificate; 4 health tabs; farms map; payouts; profile; Android build passes the QA checklist |
 
@@ -1932,8 +1933,8 @@ git commit -m "feat: add crop health classification and yield analysis"
   - type `Scenario = 'healthy' | 'drought' | 'normal'`
   - `generateSeries(opts: { seed: number; crop: Crop; scenario: Scenario; weeks?: number; endDate?: Date }): MonitorSeries` (16 weeks by default)
   - `generateYieldHistory(seed: number, crop: Crop, badYearIndexes: number[], startYear?: number, years?: number): YieldData[]`
-  - `SEED_PHONE = '+254712345678'`, `MOCK_OTP = '123456'`, `SEED_SCENARIOS: Record<string, Scenario>`, `YIELD_HISTORIES: Record<string, YieldData[]>` keyed `"County:crop"`, type `SeedData = { farmer: Farmer; farms: Farm[]; policies: Policy[]; payouts: Payout[] }`, `buildSeedData(): SeedData`.
-  - Seed ids: farms `farm-maize`, `farm-beans`, `farm-tea`; policies `policy-maize`, `policy-beans`; payout `payout-beans`.
+  - `SEED_PHONE = '+254712345678'`, `MOCK_OTP = '123456'`, `SEED_SCENARIOS: Record<string, Scenario>`, `YIELD_HISTORIES: Record<string, YieldData[]>` keyed `"County:crop"`, type `SeedData = { farmer: Farmer; farms: Farm[]; policies: Policy[]; payouts: Payout[] }`, `buildAccounts(): SeedData[]` (Wanjiru, Kipkoech, Achieng — in that order), `buildSeedData(): SeedData` (= Wanjiru, the default account used by most tests).
+  - Seed ids — Wanjiru: farms `farm-maize`, `farm-beans`, `farm-tea`; policies `policy-maize`, `policy-beans`; payout `payout-beans`. Kipkoech: farm `farm-kip-tea`, policy `policy-kip-tea` (expired). Achieng: farm `farm-ach-maize`, policy `policy-ach-maize` (claimed), payout `payout-ach` (stage `sent`, read).
 
 - [ ] **Step 1: Write the failing tests**
 
@@ -1985,7 +1986,7 @@ test('yield history marks the requested bad years', () => {
 `src/data/mockData.test.ts`:
 
 ```ts
-import { buildSeedData, SEED_PHONE } from '@/src/data/mockData'
+import { buildAccounts, buildSeedData, SEED_PHONE } from '@/src/data/mockData'
 
 test('seed farmer has three farms telling different stories', () => {
   const d = buildSeedData()
@@ -2011,6 +2012,31 @@ test('maize and beans are insured, tea is not', () => {
 test('beans payout is approved and unread', () => {
   const [p] = buildSeedData().payouts
   expect(p).toMatchObject({ id: 'payout-beans', amountKES: 10800, stage: 'approved', read: false })
+})
+
+test('three policyholders with unique phones, IDs and policy numbers', () => {
+  const accounts = buildAccounts()
+  expect(accounts.map((a) => a.farmer.name)).toEqual(['Wanjiru Kamau', 'Kipkoech Langat', 'Achieng Otieno'])
+  expect(new Set(accounts.map((a) => a.farmer.phone)).size).toBe(3)
+  expect(new Set(accounts.map((a) => a.farmer.nationalId)).size).toBe(3)
+  const numbers = accounts.flatMap((a) => a.policies.map((p) => p.policyNumber))
+  expect(new Set(numbers).size).toBe(numbers.length)
+  expect(buildSeedData()).toEqual(accounts[0])
+})
+
+test('Kipkoech has only an expired tea policy', () => {
+  const kip = buildAccounts()[1]
+  expect(kip.farmer).toMatchObject({ phone: '+254722111222', nationalId: '31234567', county: 'Kericho' })
+  expect(kip.farms.map((f) => f.id)).toEqual(['farm-kip-tea'])
+  expect(kip.policies).toEqual([expect.objectContaining({ policyNumber: 'AGR-2025-007731', status: 'expired' })])
+  expect(kip.payouts).toEqual([])
+})
+
+test('Achieng has a claimed maize policy whose payout was sent', () => {
+  const ach = buildAccounts()[2]
+  expect(ach.farmer).toMatchObject({ phone: '+254733444555', nationalId: '29876543', county: 'Makueni' })
+  expect(ach.policies[0]).toMatchObject({ policyNumber: 'AGR-2026-003150', status: 'claimed', sumInsuredKES: 84000 })
+  expect(ach.payouts[0]).toMatchObject({ id: 'payout-ach', amountKES: 24000, stage: 'sent', read: true })
 })
 ```
 
@@ -2160,12 +2186,15 @@ export const SEED_SCENARIOS: Record<string, Scenario> = {
   'farm-maize': 'healthy',
   'farm-beans': 'drought',
   'farm-tea': 'normal',
+  'farm-kip-tea': 'normal',
+  'farm-ach-maize': 'drought',
 }
 
 export const YIELD_HISTORIES: Record<string, ReturnType<typeof generateYieldHistory>> = {
   'Nakuru:maize': generateYieldHistory(11, 'maize', [3]),
   'Machakos:beans': generateYieldHistory(22, 'beans', [1, 4, 6, 8]),
   'Kericho:tea': generateYieldHistory(33, 'tea', [2, 7]),
+  'Makueni:maize': generateYieldHistory(44, 'maize', [2, 5, 8]),
 }
 
 export interface SeedData {
@@ -2201,7 +2230,7 @@ function seedFarm(
   }
 }
 
-export function buildSeedData(): SeedData {
+function wanjiru(): SeedData {
   const farmer: Farmer = {
     id: 'farmer-1',
     name: 'Wanjiru Kamau',
@@ -2268,7 +2297,96 @@ export function buildSeedData(): SeedData {
 
   return { farmer, farms: [maize, beans, tea], policies, payouts }
 }
+
+function kipkoech(): SeedData {
+  const farmer: Farmer = {
+    id: 'farmer-2',
+    name: 'Kipkoech Langat',
+    phone: '+254722111222',
+    county: 'Kericho',
+    nationalId: '31234567',
+    primaryCrop: 'tea',
+  }
+  const tea = seedFarm('farm-kip-tea', 'Kapsoit Tea', 'tea', 'long_rains', 'Kericho', [-0.3912, 35.3127], 3, '2018-04-02T00:00:00.000Z')
+  const si = sumInsured('tea', tea.areaHa, 'standard')
+  const policies: Policy[] = [
+    {
+      id: 'policy-kip-tea',
+      policyNumber: 'AGR-2025-007731',
+      farmId: tea.id,
+      planId: 'standard',
+      sumInsuredKES: si,
+      ...premiumBreakdown(si, tea.riskLevel),
+      triggerYieldPct: 70,
+      coverageStart: '2025-03-01T00:00:00.000Z',
+      coverageEnd: '2025-07-31T00:00:00.000Z',
+      status: 'expired',
+      mpesaReceipt: 'RB47KQ9WZE',
+    },
+  ]
+  return { farmer, farms: [tea], policies, payouts: [] }
+}
+
+function achieng(): SeedData {
+  const farmer: Farmer = {
+    id: 'farmer-3',
+    name: 'Achieng Otieno',
+    phone: '+254733444555',
+    county: 'Makueni',
+    nationalId: '29876543',
+    primaryCrop: 'maize',
+  }
+  const maize = seedFarm('farm-ach-maize', 'Wote Field', 'maize', 'long_rains', 'Makueni', [-1.804, 37.6203], 1, '2026-03-20T00:00:00.000Z')
+  const si = sumInsured('maize', maize.areaHa, 'standard')
+  const policies: Policy[] = [
+    {
+      id: 'policy-ach-maize',
+      policyNumber: 'AGR-2026-003150',
+      farmId: maize.id,
+      planId: 'standard',
+      sumInsuredKES: si,
+      ...premiumBreakdown(si, maize.riskLevel),
+      triggerYieldPct: 70,
+      coverageStart: '2026-03-01T00:00:00.000Z',
+      coverageEnd: '2026-07-31T00:00:00.000Z',
+      status: 'claimed',
+      mpesaReceipt: 'SH20DN6PLC',
+    },
+  ]
+  const payouts: Payout[] = [
+    {
+      id: 'payout-ach',
+      policyId: 'policy-ach-maize',
+      farmId: maize.id,
+      expectedYield: 2.5,
+      actualYield: 1.25,
+      shortfallPct: 50,
+      amountKES: payoutAmount(si, 70, 50),
+      stage: 'sent',
+      stageDates: {
+        triggered: '2026-08-20T00:00:00.000Z',
+        assessed: '2026-09-03T00:00:00.000Z',
+        approved: '2026-09-17T00:00:00.000Z',
+        sent: '2026-09-19T00:00:00.000Z',
+      },
+      read: true,
+    },
+  ]
+  return { farmer, farms: [maize], policies, payouts }
+}
+
+/** Every existing policyholder, in a fixed order (Wanjiru first). */
+export function buildAccounts(): SeedData[] {
+  return [wanjiru(), kipkoech(), achieng()]
+}
+
+/** The default account (Wanjiru) used by most tests and the phone demo hint. */
+export function buildSeedData(): SeedData {
+  return wanjiru()
+}
 ```
+
+Checks: Achieng's cover is 120,000 × 1 ha × 0.7 = 84,000 and the payout at 50% of normal is 84,000 × (70 − 50) / 70 = 24,000. `Makueni:maize` has 3 bad years → medium risk.
 
 - [ ] **Step 4: Run tests**
 
@@ -2777,7 +2895,7 @@ git commit -m "feat: add app state reducer, persistence and hooks"
 - Consumes: Tasks 2–7.
 - Produces:
   - `serviceConfig: { latencyMs: number; paymentMs: number; paymentTimeoutMs: number }` (defaults 600 / 4000 / 60000), `delay(ms: number): Promise<void>`, `newId(prefix: string): string`
-  - authService: `sendOtp(phone: string): Promise<{ hint: string }>`, type `VerifyResult = { ok: false } | { ok: true; isNewUser: true } | { ok: true; isNewUser: false; data: SeedData }`, `verifyOtp(phone: string, code: string): Promise<VerifyResult>`, `register(input: { phone: string; name: string; county: string; nationalId: string; primaryCrop: Crop }): Promise<Farmer>`
+  - authService: `sendOtp(phone: string): Promise<{ hint: string }>`, type `VerifyResult = { ok: false } | { ok: true; isNewUser: true } | { ok: true; isNewUser: false; data: SeedData }`, `verifyOtp(phone: string, code: string): Promise<VerifyResult>` (any existing policyholder's phone → that account's data), `register(input: { phone: string; name: string; county: string; nationalId: string; primaryCrop: Crop }): Promise<Farmer>`, type `LookupType = 'policy' | 'id'`, `normalizePolicyNumber(input: string): string` (uppercase, letters and digits only), `findPolicyholder(type: LookupType, value: string): Promise<{ phone: string } | null>`
   - farmService: `getYieldHistory(county: string, crop: Crop): YieldData[]`, `analyzeFarmYield(farm: Pick<Farm, 'county' | 'crop'>): Promise<YieldAnalysisResult>`, `createFarm(form: FarmFormData, county: string): Promise<Farm>` (rejects with `Error('incomplete_form')` if name/crop/season missing or boundary invalid), `updateFarm(farm: Farm, form: FarmFormData): Promise<Farm>`
   - monitorService: `seriesFor(farm: Pick<Farm, 'id' | 'crop'>): MonitorSeries` (sync), `getSeries(farm: Pick<Farm, 'id' | 'crop'>): Promise<MonitorSeries>`, `getWeather(county: string): Weather` (sync)
   - policyService: `getQuote(farm: Farm, planId: PlanId): Promise<Quote>`, `createPolicy(quote: Quote, mpesaReceipt: string): Promise<Policy>`
@@ -2798,7 +2916,13 @@ serviceConfig.paymentTimeoutMs = 0
 ```ts
 import { emptyFarmForm } from '@/src/context/reducer'
 import { buildSeedData, MOCK_OTP, SEED_PHONE } from '@/src/data/mockData'
-import { register, sendOtp, verifyOtp } from '@/src/services/authService'
+import {
+  findPolicyholder,
+  normalizePolicyNumber,
+  register,
+  sendOtp,
+  verifyOtp,
+} from '@/src/services/authService'
 import { analyzeFarmYield, createFarm, getYieldHistory, updateFarm } from '@/src/services/farmService'
 import { getWeather, seriesFor } from '@/src/services/monitorService'
 import { requestMpesaPayment } from '@/src/services/paymentService'
@@ -2818,6 +2942,36 @@ test('OTP: seeded phone is a returning user with data', async () => {
 
 test('OTP: any other phone is a new user', async () => {
   expect(await verifyOtp('+254700000001', MOCK_OTP)).toEqual({ ok: true, isNewUser: true })
+})
+
+test('OTP: every existing policyholder loads their own account', async () => {
+  const kip = await verifyOtp('+254722111222', MOCK_OTP)
+  expect(kip.ok && !kip.isNewUser && kip.data.farmer.name).toBe('Kipkoech Langat')
+  const ach = await verifyOtp('+254733444555', MOCK_OTP)
+  expect(ach.ok && !ach.isNewUser && ach.data.farmer.name).toBe('Achieng Otieno')
+})
+
+test('policy numbers normalise case, spaces and dashes', () => {
+  expect(normalizePolicyNumber(' agr 2026-004417 ')).toBe('AGR2026004417')
+})
+
+test.each([
+  ['policy', 'AGR-2026-004417', '+254712345678'],
+  ['policy', 'agr 2026 001982', '+254712345678'],
+  ['policy', 'AGR2025007731', '+254722111222'],
+  ['id', '31234567', '+254722111222'],
+  ['id', ' 29876543 ', '+254733444555'],
+] as const)('findPolicyholder(%s, %s) finds the phone on file', async (type, value, phone) => {
+  expect(await findPolicyholder(type, value)).toEqual({ phone })
+})
+
+test.each([
+  ['policy', 'AGR-2026-999999'],
+  ['policy', '   '],
+  ['id', '11111111'],
+  ['id', '123'],
+] as const)('findPolicyholder(%s, %s) finds nobody', async (type, value) => {
+  expect(await findPolicyholder(type, value)).toBeNull()
 })
 
 test('register trims input and returns a farmer', async () => {
@@ -2919,9 +3073,10 @@ export function newId(prefix: string): string {
 - [ ] **Step 4: Implement `src/services/authService.ts`**
 
 ```ts
-import { buildSeedData, MOCK_OTP, SEED_PHONE, type SeedData } from '@/src/data/mockData'
+import { buildAccounts, MOCK_OTP, type SeedData } from '@/src/data/mockData'
 import { delay, newId, serviceConfig } from '@/src/services/config'
 import type { Crop, Farmer } from '@/src/types'
+import { isValidNationalId } from '@/src/utils/validation'
 
 export async function sendOtp(_phone: string): Promise<{ hint: string }> {
   await delay(serviceConfig.latencyMs)
@@ -2936,8 +3091,39 @@ export type VerifyResult =
 export async function verifyOtp(phone: string, code: string): Promise<VerifyResult> {
   await delay(serviceConfig.latencyMs)
   if (code !== MOCK_OTP) return { ok: false }
-  if (phone === SEED_PHONE) return { ok: true, isNewUser: false, data: buildSeedData() }
+  const account = buildAccounts().find((a) => a.farmer.phone === phone)
+  if (account) return { ok: true, isNewUser: false, data: account }
   return { ok: true, isNewUser: true }
+}
+
+export type LookupType = 'policy' | 'id'
+
+export function normalizePolicyNumber(input: string): string {
+  return input.toUpperCase().replace(/[^A-Z0-9]/g, '')
+}
+
+/**
+ * Finds the existing policyholder for a policy number or national ID.
+ * Returns only the phone on file — the caller must confirm it with an OTP.
+ */
+export async function findPolicyholder(
+  type: LookupType,
+  value: string,
+): Promise<{ phone: string } | null> {
+  await delay(serviceConfig.latencyMs)
+  const accounts = buildAccounts()
+  if (type === 'id') {
+    const id = value.trim()
+    if (!isValidNationalId(id)) return null
+    const match = accounts.find((a) => a.farmer.nationalId === id)
+    return match ? { phone: match.farmer.phone } : null
+  }
+  const wanted = normalizePolicyNumber(value)
+  if (!wanted) return null
+  const match = accounts.find((a) =>
+    a.policies.some((p) => normalizePolicyNumber(p.policyNumber) === wanted),
+  )
+  return match ? { phone: match.farmer.phone } : null
 }
 
 export async function register(input: {
@@ -5127,7 +5313,7 @@ git commit -m "feat: add common UI components, icons and illustrations"
 - Consumes: `AppProvider`, `useAuth`, `useFarmer` (Task 8), `Screen`, `Header`, `ErrorState`, `Button`, `LoadingState` (Task 12).
 - Produces:
   - `AppRoutes` (named export of `src/App.tsx`) — the full route table; default export `App` wraps it in `AppProvider` + `BrowserRouter`.
-  - `<PublicRoute />`: renders `<Outlet/>` unless logged in with a farmer → `/home`; logged in without farmer → `/registration`.
+  - `<PublicRoute />`: renders `<Outlet/>` unless logged in with a farmer → `/home`; logged in without farmer → `/registration`. Public routes: `/`, `/phone-entry`, `/otp-verification`, `/policy-lookup`.
   - `<ProtectedRoute allowNewUser? />`: not logged in → `/`; without farmer and not `allowNewUser` → `/registration`; `allowNewUser` and farmer exists → `/home`.
   - Every page module under `src/pages/**` has a **default export** component (later tasks replace the stub bodies, keeping file name and default export).
   - Shared page stylesheet `src/pages/pages.module.css` — later tasks append classes to it.
@@ -5163,7 +5349,7 @@ export function Placeholder({ title }: { title: string }) {
 Create every page stub with this script:
 
 ```bash
-for p in onboarding/Welcome onboarding/PhoneEntry onboarding/OtpVerification onboarding/Registration \
+for p in onboarding/Welcome onboarding/PhoneEntry onboarding/OtpVerification onboarding/Registration onboarding/PolicyLookup \
   farm/Home farm/FarmDetail farm/AddFarm farm/BoundaryIntro farm/BoundaryMap farm/BoundaryQuickMap \
   farm/BoundaryWalk farm/BoundaryDraw farm/ConfirmFarm farm/ViewBoundary farm/YieldAnalysis farm/YieldReport \
   insurance/PlanOptions insurance/PremiumQuote insurance/Payment insurance/Confirmation \
@@ -5326,6 +5512,7 @@ const Welcome = lazy(() => import('@/src/pages/onboarding/Welcome'))
 const PhoneEntry = lazy(() => import('@/src/pages/onboarding/PhoneEntry'))
 const OtpVerification = lazy(() => import('@/src/pages/onboarding/OtpVerification'))
 const Registration = lazy(() => import('@/src/pages/onboarding/Registration'))
+const PolicyLookup = lazy(() => import('@/src/pages/onboarding/PolicyLookup'))
 const Home = lazy(() => import('@/src/pages/farm/Home'))
 const FarmDetail = lazy(() => import('@/src/pages/farm/FarmDetail'))
 const AddFarm = lazy(() => import('@/src/pages/farm/AddFarm'))
@@ -5375,6 +5562,7 @@ export function AppRoutes() {
           <Route path='/' element={<Welcome />} />
           <Route path='/phone-entry' element={<PhoneEntry />} />
           <Route path='/otp-verification' element={<OtpVerification />} />
+          <Route path='/policy-lookup' element={<PolicyLookup />} />
         </Route>
         <Route element={<ProtectedRoute allowNewUser />}>
           <Route path='/registration' element={<Registration />} />
@@ -5457,9 +5645,9 @@ git commit -m "feat: add route table with guards, lazy page stubs and Not Found"
 
 **Files:**
 - Create: `src/components/forms/forms.module.css`, `src/components/forms/Field.tsx`, `src/components/forms/OtpInput.tsx`, `src/components/forms/CropPicker.tsx`
-- Replace stubs: `src/pages/onboarding/Welcome.tsx`, `src/pages/onboarding/PhoneEntry.tsx`, `src/pages/onboarding/OtpVerification.tsx`, `src/pages/onboarding/Registration.tsx`
+- Replace stubs: `src/pages/onboarding/Welcome.tsx`, `src/pages/onboarding/PhoneEntry.tsx`, `src/pages/onboarding/OtpVerification.tsx`, `src/pages/onboarding/Registration.tsx`, `src/pages/onboarding/PolicyLookup.tsx`
 - Modify: `src/i18n/en.ts`, `src/pages/pages.module.css` (append), `src/test/renderWithApp.tsx` (route may carry `state`), `src/utils/format.ts` + `src/utils/format.test.ts` (phone grouping)
-- Test: `src/components/forms/forms.test.tsx`, `src/pages/onboarding/onboarding.test.tsx`
+- Test: `src/components/forms/forms.test.tsx`, `src/pages/onboarding/onboarding.test.tsx`, `src/pages/onboarding/PolicyLookup.test.tsx`
 
 **Interfaces:**
 - Consumes: `sendOtp`, `verifyOtp`, `register` (Task 9); `normalizeKenyanPhone`, `isValidName`, `isValidNationalId` (Task 3); `formatPhone` (Task 3); adds `groupLocalPhone(input: string): string` to `src/utils/format.ts`; `COUNTIES`, `CROP_LIST` (Task 2); `useApp` (Task 8); common components (Task 12); illustrations (Task 12).
@@ -5467,9 +5655,10 @@ git commit -m "feat: add route table with guards, lazy page stubs and Not Found"
   - `<Field id: string label: string error?: string hint?: string>children</Field>` (error rendered with `role="alert"`)
   - `<OtpInput value: string onChange: (v: string) => void length?: number error?: boolean errorKey?: number />` (inputs labelled `Digit 1`…`Digit 6`)
   - `<CropPicker value: Crop | null onChange: (c: Crop) => void label: string />` (`role="radiogroup"`, options `role="radio"`)
-  - Navigation contract: PhoneEntry → `navigate('/otp-verification', { state: { phone, hint } })`; OTP page without `state.phone` → `<Navigate to='/phone-entry' replace />`.
+  - Navigation contract: PhoneEntry → `navigate('/otp-verification', { state: { phone, hint } })`; PolicyLookup → `navigate('/otp-verification', { state: { phone, hint, masked: true } })`; OTP page without `state.phone` → `<Navigate to='/phone-entry' replace />`; with `masked: true` it shows `maskPhone(phone)` instead of the full number.
+  - Adds `maskPhone(e164: string): string` (`+254712345678` → `+254 7•• ••• 678`) to `src/utils/format.ts`; uses `findPolicyholder` (Task 9) on the lookup screen and as the duplicate-ID guard in Registration.
   - `renderWithApp` `route` option accepts `string | { pathname: string; state?: unknown }`.
-  - CSS classes appended to `forms.module.css`: `input`, `label`, `error`, `hint`, `phoneRow`, `prefix`, `otpRow`, `otpBox`, `shake`, `cropGrid`, `cropTile`, `selectBtn`, `listBtn`.
+  - CSS classes in `forms.module.css`: `input`, `label`, `error`, `hint`, `phoneRow`, `prefix`, `otpRow`, `otpBox`, `shake`, `cropGrid`, `cropTile`, `selectBtn`, `listBtn`, `segment`, `segmentBtn`.
 
 - [ ] **Step 1: Append i18n keys** in `src/i18n/en.ts`:
 
@@ -5482,7 +5671,7 @@ git commit -m "feat: add route table with guards, lazy page stubs and Not Found"
   'welcome.slide3.title': 'Get paid automatically to M-Pesa',
   'welcome.slide3.body': 'When harvests in your area fall, your payout goes straight to your phone.',
   'welcome.start': 'Get started',
-  'welcome.haveAccount': 'I already have an account',
+  'welcome.haveAccount': 'I already have a policy',
   'welcome.slideOf': 'Slide {n} of {total}',
   'phone.title': 'What is your phone number?',
   'phone.body': 'We will send you a code by SMS. Use your M-Pesa number.',
@@ -5514,6 +5703,18 @@ git commit -m "feat: add route table with guards, lazy page stubs and Not Found"
   'reg.crop': 'Main crop',
   'reg.cropError': 'Choose your main crop',
   'reg.submit': 'Create my account',
+  'reg.idExists': 'This ID already has a policy with us.',
+  'reg.findPolicy': 'Find my policy',
+  'lookup.title': 'Find my policy',
+  'lookup.body': 'Use the policy number on your certificate or SMS, or your national ID number.',
+  'lookup.byPolicy': 'Policy number',
+  'lookup.byId': 'ID number',
+  'lookup.policyPlaceholder': 'AGR-2026-004417',
+  'lookup.idPlaceholder': '12345678',
+  'lookup.empty': 'Enter your number first.',
+  'lookup.notFound': "We couldn't find a policy with that number. Check it, or sign up with your phone number.",
+  'lookup.signUp': 'Sign up with my phone number',
+  'lookup.demoHint': 'Demo: try AGR-2026-004417, AGR-2025-007731 or ID 29876543.',
 ```
 
 - [ ] **Step 2: Let `renderWithApp` routes carry state** — in `src/test/renderWithApp.tsx` change the option type:
@@ -5540,9 +5741,14 @@ test.each([
 ])('groupLocalPhone(%s)', (input, expected) => {
   expect(groupLocalPhone(input)).toBe(expected)
 })
+
+test('maskPhone hides the middle digits of the phone on file', () => {
+  expect(maskPhone('+254712345678')).toBe('+254 7•• ••• 678')
+  expect(maskPhone('+254722111222')).toBe('+254 7•• ••• 222')
+})
 ```
 
-(Merge the import into the existing import list.) Run `npm test -- src/utils/format` — expect FAIL, then append to `src/utils/format.ts`:
+(Merge `groupLocalPhone` and `maskPhone` into the existing import list.) Run `npm test -- src/utils/format` — expect FAIL, then append to `src/utils/format.ts`:
 
 ```ts
 /** Formats the local part of a Kenyan number in groups as it is typed: 712 345 678 / 0712 345 678. */
@@ -5552,6 +5758,12 @@ export function groupLocalPhone(input: string): string {
   d = d.slice(0, d.startsWith('0') ? 10 : 9)
   const head = d.startsWith('0') ? 4 : 3
   return [d.slice(0, head), d.slice(head, head + 3), d.slice(head + 3)].filter(Boolean).join(' ')
+}
+
+/** Shows only the first and last digits of a stored number: +254 7•• ••• 678. */
+export function maskPhone(e164: string): string {
+  const local = e164.replace(/^\+254/, '')
+  return `+254 ${local[0]}•• ••• ${local.slice(-3)}`
 }
 ```
 
@@ -5771,6 +5983,29 @@ Expected: FAIL — modules not found.
   max-height: 50vh;
   overflow-y: auto;
   margin-top: var(--sp-3);
+}
+
+.segment {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4px;
+  padding: 4px;
+  border-radius: var(--radius-pill);
+  background: var(--surface);
+  box-shadow: var(--shadow);
+}
+.segmentBtn {
+  min-height: var(--tap);
+  border: 0;
+  border-radius: var(--radius-pill);
+  background: none;
+  font-weight: 700;
+  color: var(--ink-2);
+  cursor: pointer;
+}
+.segmentBtn[aria-checked='true'] {
+  background: var(--green-700);
+  color: #fff;
 }
 ```
 
@@ -6041,6 +6276,12 @@ test('Welcome shows the value story and starts sign-up', async () => {
   expect(screen.getByTestId('location')).toHaveTextContent('/phone-entry')
 })
 
+test('Welcome sends existing policyholders to policy lookup', async () => {
+  const { user } = renderWithApp(<Welcome />)
+  await user.click(screen.getByRole('button', { name: 'I already have a policy' }))
+  expect(screen.getByTestId('location')).toHaveTextContent('/policy-lookup')
+})
+
 test('PhoneEntry rejects a bad number', async () => {
   const { user } = renderWithApp(<PhoneEntry />, { route: '/phone-entry', path: '/phone-entry' })
   await user.type(screen.getByLabelText('Phone number'), '812')
@@ -6089,6 +6330,19 @@ test('OTP for a new number goes to registration', async () => {
   expect(await screen.findByTestId('location')).toHaveTextContent('/registration')
 })
 
+test('OTP after a policy lookup shows the masked phone and loads that farmer', async () => {
+  const { user } = renderWithApp(<OtpVerification />, {
+    route: { pathname: '/otp-verification', state: { phone: '+254722111222', hint: '123456', masked: true } },
+    path: '/otp-verification',
+  })
+  expect(screen.getByText(/\+254 7•• ••• 222/)).toBeInTheDocument()
+  expect(screen.queryByText(/722 111 222/)).not.toBeInTheDocument()
+  await user.click(screen.getByLabelText('Digit 1'))
+  await user.keyboard('123456')
+  expect(await screen.findByTestId('location')).toHaveTextContent('/home')
+  expect(localStorage.getItem(STATE_KEY)).toContain('Kipkoech Langat')
+})
+
 test('OTP resend is locked during the countdown', () => {
   renderWithApp(<OtpVerification />, otpRoute('+254700000001'))
   expect(screen.getByRole('button', { name: /resend code in 30s/i })).toBeDisabled()
@@ -6109,6 +6363,19 @@ test('Registration validates every field', async () => {
     'Your ID number has 7 or 8 digits',
     'Choose your main crop',
   ])
+})
+
+test('Registration stops an ID that already has a policy', async () => {
+  const { user } = renderWithApp(<Registration />, { route: '/registration', path: '/registration', state: newUser })
+  await user.type(screen.getByLabelText('Full name'), 'Someone Else')
+  await user.click(screen.getByRole('button', { name: /county/i }))
+  await user.click(within(screen.getByRole('dialog')).getByRole('button', { name: 'Kericho' }))
+  await user.type(screen.getByLabelText('National ID number'), '31234567')
+  await user.click(screen.getByRole('radio', { name: /tea/i }))
+  await user.click(screen.getByRole('button', { name: 'Create my account' }))
+  expect(await screen.findByRole('alert')).toHaveTextContent('This ID already has a policy with us.')
+  await user.click(screen.getByRole('button', { name: 'Find my policy' }))
+  expect(screen.getByTestId('location')).toHaveTextContent('/policy-lookup')
 })
 
 test('Registration creates the farmer and goes home', async () => {
@@ -6205,7 +6472,7 @@ export default function Welcome() {
         <Button block onClick={() => navigate('/phone-entry')}>
           {t('welcome.start')}
         </Button>
-        <Button block variant='ghost' onClick={() => navigate('/phone-entry')}>
+        <Button block variant='secondary' onClick={() => navigate('/policy-lookup')}>
           {t('welcome.haveAccount')}
         </Button>
       </div>
@@ -6305,7 +6572,7 @@ import { useApp } from '@/src/context/AppContext'
 import { t } from '@/src/i18n'
 import styles from '@/src/pages/pages.module.css'
 import { sendOtp, verifyOtp } from '@/src/services/authService'
-import { formatPhone } from '@/src/utils/format'
+import { formatPhone, maskPhone } from '@/src/utils/format'
 
 const RESEND_SECONDS = 30
 
@@ -6313,7 +6580,7 @@ export default function OtpVerification() {
   const location = useLocation()
   const navigate = useNavigate()
   const { dispatch } = useApp()
-  const state = location.state as { phone?: string; hint?: string } | null
+  const state = location.state as { phone?: string; hint?: string; masked?: boolean } | null
   const phone = state?.phone
   const [code, setCode] = useState('')
   const [hint, setHint] = useState(state?.hint ?? '')
@@ -6363,7 +6630,7 @@ export default function OtpVerification() {
         <div className='stack-sm'>
           <h1 className='h1'>{t('otp.title')}</h1>
           <p style={{ margin: 0, fontSize: 'var(--fs-md)' }}>
-            {t('otp.body', { phone: formatPhone(phone) })}
+            {t('otp.body', { phone: state?.masked ? maskPhone(phone) : formatPhone(phone) })}
           </p>
         </div>
         {hint && (
@@ -6416,7 +6683,7 @@ import formStyles from '@/src/components/forms/forms.module.css'
 import { useApp } from '@/src/context/AppContext'
 import { COUNTIES } from '@/src/data/cropConfig'
 import { t } from '@/src/i18n'
-import { register } from '@/src/services/authService'
+import { findPolicyholder, register } from '@/src/services/authService'
 import type { Crop } from '@/src/types'
 import { isValidName, isValidNationalId } from '@/src/utils/validation'
 
@@ -6433,6 +6700,7 @@ export default function Registration() {
   const [sheetOpen, setSheetOpen] = useState(false)
   const [query, setQuery] = useState('')
   const [saving, setSaving] = useState(false)
+  const [idTaken, setIdTaken] = useState(false)
 
   const matches = COUNTIES.filter((c) => c.toLowerCase().includes(query.trim().toLowerCase()))
 
@@ -6444,8 +6712,15 @@ export default function Registration() {
     if (!isValidNationalId(nationalId)) next.id = t('reg.idError')
     if (!crop) next.crop = t('reg.cropError')
     setErrors(next)
+    setIdTaken(false)
     if (Object.keys(next).length || !crop || !state.auth.phone) return
     setSaving(true)
+    if (await findPolicyholder('id', nationalId)) {
+      setSaving(false)
+      setIdTaken(true)
+      setErrors({ id: t('reg.idExists') })
+      return
+    }
     const farmer = await register({
       phone: state.auth.phone,
       name,
@@ -6505,6 +6780,11 @@ export default function Registration() {
             onChange={(e) => setNationalId(e.target.value.replace(/\D/g, '').slice(0, 8))}
           />
         </Field>
+        {idTaken && (
+          <Button variant='secondary' block onClick={() => navigate('/policy-lookup')}>
+            {t('reg.findPolicy')}
+          </Button>
+        )}
         <div className='stack-sm'>
           <span className={formStyles.label}>{t('reg.crop')}</span>
           <CropPicker value={crop} onChange={setCrop} label={t('reg.crop')} />
@@ -6550,14 +6830,175 @@ export default function Registration() {
 }
 ```
 
+- [ ] **Step 12b: Write the failing lookup tests `src/pages/onboarding/PolicyLookup.test.tsx`**
+
+```tsx
+import { screen } from '@testing-library/react'
+import PolicyLookup from '@/src/pages/onboarding/PolicyLookup'
+import { renderWithApp } from '@/src/test/renderWithApp'
+
+const at = { route: '/policy-lookup', path: '/policy-lookup' }
+
+test('finds a policy number typed loosely and goes to OTP', async () => {
+  const { user } = renderWithApp(<PolicyLookup />, at)
+  expect(screen.getByRole('radio', { name: 'Policy number' })).toHaveAttribute('aria-checked', 'true')
+  await user.type(screen.getByLabelText('Policy number'), 'agr 2026 004417')
+  await user.click(screen.getByRole('button', { name: 'Continue' }))
+  expect(await screen.findByTestId('location')).toHaveTextContent('/otp-verification')
+})
+
+test('finds a national ID and goes to OTP', async () => {
+  const { user } = renderWithApp(<PolicyLookup />, at)
+  await user.click(screen.getByRole('radio', { name: 'ID number' }))
+  await user.type(screen.getByLabelText('ID number'), '31234567')
+  await user.click(screen.getByRole('button', { name: 'Continue' }))
+  expect(await screen.findByTestId('location')).toHaveTextContent('/otp-verification')
+})
+
+test('unknown numbers get one neutral message and a sign-up link', async () => {
+  const { user } = renderWithApp(<PolicyLookup />, at)
+  await user.type(screen.getByLabelText('Policy number'), 'AGR-2026-999999')
+  await user.click(screen.getByRole('button', { name: 'Continue' }))
+  expect(await screen.findByRole('alert')).toHaveTextContent("We couldn't find a policy with that number.")
+  await user.click(screen.getByRole('button', { name: 'Sign up with my phone number' }))
+  expect(screen.getByTestId('location')).toHaveTextContent('/phone-entry')
+})
+
+test('the message for an unknown ID is identical', async () => {
+  const { user } = renderWithApp(<PolicyLookup />, at)
+  await user.click(screen.getByRole('radio', { name: 'ID number' }))
+  await user.type(screen.getByLabelText('ID number'), '11111111')
+  await user.click(screen.getByRole('button', { name: 'Continue' }))
+  expect(await screen.findByRole('alert')).toHaveTextContent("We couldn't find a policy with that number.")
+})
+
+test('an empty box asks for a number', async () => {
+  const { user } = renderWithApp(<PolicyLookup />, at)
+  await user.click(screen.getByRole('button', { name: 'Continue' }))
+  expect(screen.getByRole('alert')).toHaveTextContent('Enter your number first.')
+})
+```
+
+Run: `npm test -- src/pages/onboarding/PolicyLookup`
+Expected: FAIL — the stub renders a placeholder.
+
+- [ ] **Step 12c: Implement `src/pages/onboarding/PolicyLookup.tsx`**
+
+```tsx
+import { useState, type FormEvent } from 'react'
+import { useNavigate } from 'react-router-dom'
+import { Button } from '@/src/components/common/Button'
+import { Header } from '@/src/components/common/Header'
+import { Screen } from '@/src/components/common/Screen'
+import { Field } from '@/src/components/forms/Field'
+import formStyles from '@/src/components/forms/forms.module.css'
+import { t } from '@/src/i18n'
+import { findPolicyholder, sendOtp, type LookupType } from '@/src/services/authService'
+
+const MODES: LookupType[] = ['policy', 'id']
+
+export default function PolicyLookup() {
+  const navigate = useNavigate()
+  const [mode, setMode] = useState<LookupType>('policy')
+  const [value, setValue] = useState('')
+  const [error, setError] = useState<string>()
+  const [notFound, setNotFound] = useState(false)
+  const [loading, setLoading] = useState(false)
+
+  const label = mode === 'policy' ? t('lookup.byPolicy') : t('lookup.byId')
+
+  const submit = async (e?: FormEvent) => {
+    e?.preventDefault()
+    if (loading) return
+    setNotFound(false)
+    if (!value.trim()) {
+      setError(t('lookup.empty'))
+      return
+    }
+    setLoading(true)
+    const found = await findPolicyholder(mode, value)
+    if (!found) {
+      setLoading(false)
+      setNotFound(true)
+      setError(t('lookup.notFound'))
+      return
+    }
+    const { hint } = await sendOtp(found.phone)
+    navigate('/otp-verification', { state: { phone: found.phone, hint, masked: true } })
+  }
+
+  return (
+    <Screen
+      header={<Header back='/' />}
+      footer={
+        <Button block loading={loading} onClick={() => submit()}>
+          {t('common.continue')}
+        </Button>
+      }
+    >
+      <form className='stack-lg' onSubmit={submit} noValidate>
+        <div className='stack-sm'>
+          <h1 className='h1'>{t('lookup.title')}</h1>
+          <p className='muted' style={{ fontSize: 'var(--fs-md)' }}>
+            {t('lookup.body')}
+          </p>
+        </div>
+        <div role='radiogroup' aria-label={t('lookup.title')} className={formStyles.segment}>
+          {MODES.map((m) => (
+            <button
+              key={m}
+              type='button'
+              role='radio'
+              aria-checked={mode === m}
+              className={formStyles.segmentBtn}
+              onClick={() => {
+                setMode(m)
+                setValue('')
+                setError(undefined)
+                setNotFound(false)
+              }}
+            >
+              {m === 'policy' ? t('lookup.byPolicy') : t('lookup.byId')}
+            </button>
+          ))}
+        </div>
+        <Field id='lookup' label={label} error={error} hint={t('lookup.demoHint')}>
+          <input
+            id='lookup'
+            className={formStyles.input}
+            inputMode={mode === 'id' ? 'numeric' : 'text'}
+            autoCapitalize='characters'
+            autoComplete='off'
+            placeholder={mode === 'policy' ? t('lookup.policyPlaceholder') : t('lookup.idPlaceholder')}
+            value={value}
+            aria-invalid={!!error}
+            autoFocus
+            onChange={(e) => {
+              setValue(e.target.value)
+              setError(undefined)
+              setNotFound(false)
+            }}
+          />
+        </Field>
+        {notFound && (
+          <Button variant='secondary' block onClick={() => navigate('/phone-entry')}>
+            {t('lookup.signUp')}
+          </Button>
+        )}
+      </form>
+    </Screen>
+  )
+}
+```
+
 - [ ] **Step 13: Run tests**
 
-Run: `npm test -- src/pages/onboarding src/components/forms`
+Run: `npm test -- src/pages/onboarding src/components/forms src/utils/format`
 Expected: PASS.
 
 - [ ] **Step 14: Manual check in the browser**
 
-Run: `npm run dev`, open `http://localhost:3000` with Chrome DevTools device toolbar at 360×740. Swipe the welcome slides; enter `0712 345 678`; type `123456`; confirm you land on `/home`. Clear site data, repeat with `0700 000 001` and finish registration.
+Run: `npm run dev`, open `http://localhost:3000` with Chrome DevTools device toolbar at 360×740. Swipe the welcome slides; enter `0712 345 678`; type `123456`; confirm you land on `/home`. Clear site data, repeat with `0700 000 001` and finish registration. Clear again, tap "I already have a policy", enter `agr 2026 004417`, check the masked phone on the OTP screen, enter `123456`, and confirm Wanjiru's home loads; repeat with ID `31234567` (Kipkoech).
 
 - [ ] **Step 15: Commit**
 
