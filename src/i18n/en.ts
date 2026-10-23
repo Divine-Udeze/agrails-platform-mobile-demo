@@ -113,6 +113,33 @@ export const en = {
   'lookup.signUp': 'Sign up with my phone number',
   'lookup.demoHint':
     'Demo: try AGR-2026-004417, AGR-2025-007731 or ID 29876543.',
+  'home.greeting': 'Hello, {name}',
+  'home.weather': '{temp}°C · {rain}% chance of rain',
+  'home.weather.sunny': 'Sunny today',
+  'home.weather.cloudy': 'Cloudy today',
+  'home.weather.rain': 'Rain likely today',
+  'home.payoutBanner': 'You have a payout of {amount}',
+  'home.payoutCta': 'See payout',
+  'home.alertTitle': 'Your {crop} in {county} needs attention',
+  'home.alertDry': 'Rain was {pct}% below normal in the last 4 weeks.',
+  'home.alertGeneric': 'Crop health is dropping. Tap to see why.',
+  'home.protection': 'Your protection',
+  'home.insuredOf': '{insured} of {total} insured',
+  'home.cover': 'Total cover {amount}',
+  'home.insuredPct': 'insured',
+  'home.insureCta': 'Insure {name}',
+  'home.myFarms': 'My farms',
+  'home.addFarm': 'Add farm',
+  'home.emptyTitle': 'No farms yet',
+  'home.emptyBody':
+    'Add your farm to see its health from space and get insured.',
+  'home.quickInsure': 'Insure a farm',
+  'home.quickPayouts': 'My payouts',
+  'farm.insured': 'Insured',
+  'farm.notInsured': 'Not insured',
+  'farm.health': 'Health {score}',
+  'farm.trend': 'Crop health trend for {name}',
+  'farm.shape': 'Shape of {name}',
 }
 
 export type StringKey = keyof typeof en

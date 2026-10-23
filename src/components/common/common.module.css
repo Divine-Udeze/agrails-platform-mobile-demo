@@ -245,3 +245,21 @@
 .withNavFooter {
   bottom: var(--nav-h);
 }
+
+.cropTile {
+  box-sizing: border-box;
+  flex: none;
+  display: grid;
+  place-items: center;
+  padding: 4px;
+  border: 2px solid var(--good);
+  background: var(--good-bg);
+}
+.cropTile[data-status='warning'] {
+  border-color: var(--warning);
+  background: var(--warning-bg);
+}
+.cropTile[data-status='danger'] {
+  border-color: var(--danger);
+  background: var(--danger-bg);
+}

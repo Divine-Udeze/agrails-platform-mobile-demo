@@ -3,6 +3,7 @@ import userEvent from '@testing-library/user-event'
 import { BottomNav } from '@/src/components/common/BottomNav'
 import { BottomSheet } from '@/src/components/common/BottomSheet'
 import { Button } from '@/src/components/common/Button'
+import { CropTile } from '@/src/components/common/CropTile'
 import { Chip } from '@/src/components/common/Chip'
 import { ErrorState } from '@/src/components/common/ErrorStates'
 import { Header } from '@/src/components/common/Header'
@@ -93,4 +94,28 @@ test('BottomSheet renders only when open and closes', async () => {
   )
   await userEvent.click(screen.getByRole('button', { name: 'Close' }))
   expect(onClose).toHaveBeenCalledOnce()
+})
+
+test('CropTile is decorative unless labelled and carries crop and status', () => {
+  const { container, rerender } = render(
+    <CropTile crop='maize' status='warning' />,
+  )
+  const tile = container.firstElementChild as HTMLElement
+  expect(tile).toHaveAttribute('data-crop', 'maize')
+  expect(tile).toHaveAttribute('data-status', 'warning')
+  expect(tile).toHaveAttribute('aria-hidden', 'true')
+  rerender(<CropTile crop='maize' label='Maize' />)
+  expect(screen.getByRole('img', { name: 'Maize' })).toBeInTheDocument()
+})
+
+test('CropTile draws distinct art per crop', () => {
+  const art = (crop: 'maize' | 'beans' | 'tea') => {
+    const { container, unmount } = render(<CropTile crop={crop} />)
+    const html = container.querySelector('svg')?.innerHTML ?? ''
+    unmount()
+    return html
+  }
+  const [m, b, t] = [art('maize'), art('beans'), art('tea')]
+  expect(m.length).toBeGreaterThan(0)
+  expect(new Set([m, b, t]).size).toBe(3)
 })
