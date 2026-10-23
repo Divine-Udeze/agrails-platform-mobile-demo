@@ -5,6 +5,8 @@ import {
   formatHa,
   formatKES,
   formatPhone,
+  groupLocalPhone,
+  maskPhone,
   formatShortDate,
   haToAcres,
 } from '@/src/utils/format'
@@ -33,4 +35,19 @@ test('formats ISO dates for farmers', () => {
 
 test('formats Kenyan phone numbers in groups', () => {
   expect(formatPhone('+254712345678')).toBe('+254 712 345 678')
+})
+
+test.each([
+  ['712345678', '712 345 678'],
+  ['0712345678', '0712 345 678'],
+  ['+254712345678', '712 345 678'],
+  ['7123', '712 3'],
+  ['71234567890', '712 345 678'],
+])('groupLocalPhone(%s)', (input, expected) => {
+  expect(groupLocalPhone(input)).toBe(expected)
+})
+
+test('maskPhone hides the middle digits of the phone on file', () => {
+  expect(maskPhone('+254712345678')).toBe('+254 7•• ••• 678')
+  expect(maskPhone('+254722111222')).toBe('+254 7•• ••• 222')
 })

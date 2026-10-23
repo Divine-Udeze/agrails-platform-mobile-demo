@@ -1,3 +1,88 @@
 .center {
   text-align: center;
 }
+
+.welcome {
+  min-height: 100%;
+  display: flex;
+  flex-direction: column;
+  background: var(--surface);
+}
+.brand {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  padding: calc(var(--sp-4) + env(safe-area-inset-top)) var(--sp-4) var(--sp-2);
+  color: var(--green-700);
+  font-weight: 800;
+  font-size: var(--fs-xl);
+}
+.slides {
+  display: flex;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
+  flex: 1;
+}
+.slides::-webkit-scrollbar {
+  display: none;
+}
+.slide {
+  flex: 0 0 100%;
+  scroll-snap-align: center;
+  padding: var(--sp-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-4);
+}
+.slideArt {
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  width: 100%;
+  aspect-ratio: 3 / 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--green-100);
+}
+.slideArt svg {
+  width: 100%;
+  height: 100%;
+}
+.dots {
+  display: flex;
+  justify-content: center;
+  gap: 0;
+  padding: 0;
+}
+.dotBtn {
+  width: 48px;
+  height: 48px;
+  border: 0;
+  background: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+.dotBtn span {
+  width: 10px;
+  height: 10px;
+  border-radius: 999px;
+  background: var(--line);
+  transition: transform 200ms var(--ease);
+}
+.dotBtn[aria-current='true'] span {
+  background: var(--green-700);
+  transform: scaleX(2.2);
+}
+.banner {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  padding: var(--sp-3);
+  border-radius: var(--radius);
+  background: var(--gold-100);
+  color: var(--soil-700);
+  font-weight: 600;
+}

@@ -48,3 +48,20 @@ export function formatPhone(e164: string): string {
   const local = e164.replace(/^\+254/, '')
   return `+254 ${local.slice(0, 3)} ${local.slice(3, 6)} ${local.slice(6)}`
 }
+
+/** Formats the local part of a Kenyan number in groups as it is typed: 712 345 678 / 0712 345 678. */
+export function groupLocalPhone(input: string): string {
+  let d = input.replace(/\D/g, '')
+  if (d.startsWith('254')) d = d.slice(3)
+  d = d.slice(0, d.startsWith('0') ? 10 : 9)
+  const head = d.startsWith('0') ? 4 : 3
+  return [d.slice(0, head), d.slice(head, head + 3), d.slice(head + 3)]
+    .filter(Boolean)
+    .join(' ')
+}
+
+/** Shows only the first and last digits of a stored number: +254 7•• ••• 678. */
+export function maskPhone(e164: string): string {
+  const local = e164.replace(/^\+254/, '')
+  return `+254 ${local[0]}•• ••• ${local.slice(-3)}`
+}

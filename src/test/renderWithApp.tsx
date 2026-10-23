@@ -27,7 +27,11 @@ export function renderWithApp(
     route = '/',
     path = '/',
     state,
-  }: { route?: string; path?: string; state?: Partial<AppState> } = {},
+  }: {
+    route?: string | { pathname: string; state?: unknown }
+    path?: string
+    state?: Partial<AppState>
+  } = {},
 ) {
   const user = userEvent.setup()
   const result = render(
