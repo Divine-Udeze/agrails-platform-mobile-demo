@@ -42,10 +42,11 @@ Real backend, real OTP or M-Pesa integration, Gemini AI features, Swahili copy, 
 ## 2. Screen flow
 
 ### 2.1 Onboarding (public)
-- **Welcome (`/`)** — landing screen. Full-bleed illustrated hero; three swipeable value cards: *Protect your harvest* → *We watch your farm from space* → *Get paid automatically to M-Pesa*; page dots; primary "Get started" button and secondary "I already have an account".
+- **Welcome (`/`)** — landing screen. Full-bleed illustrated hero; three swipeable value cards: *Protect your harvest* → *We watch your farm from space* → *Get paid automatically to M-Pesa*; page dots; primary "Get started" button (new farmers → phone entry) and secondary "I already have a policy" (→ policy lookup).
 - **Phone entry (`/phone-entry`)** — fixed `+254` prefix; validates Kenyan mobile numbers (`7XXXXXXXX` or `1XXXXXXXX`, 9 digits after prefix); formats as user types.
 - **OTP (`/otp-verification`)** — 6-box `OtpInput` with auto-advance and paste support; mock code `123456` shown in a hint banner; 30 s resend countdown; wrong code shows inline error and shakes boxes.
-- **Registration (`/registration`)** — full name, county (searchable picker of 47 counties), national ID number (7–8 digits), primary crop (icon tiles). New users go here after OTP; returning (seeded) number skips to Home.
+- **Find my policy (`/policy-lookup`)** — for existing policyholders, so they never register. Toggle between *Policy number* and *ID number*, one input. Policy numbers match ignoring case, spaces and dashes (`agr 2026 004417` = `AGR-2026-004417`); ID numbers must be 7–8 digits. Not found → one neutral message for both modes ("We couldn't find a policy with that number. Check it, or sign up with your phone number") with a link to phone entry, so the screen never reveals which numbers exist. Found → an OTP is sent to the phone on file and the OTP screen shows that phone masked (`+254 7•• ••• 678`). After the code, that farmer's farms, policies and payouts load and they land on Home.
+- **Registration (`/registration`)** — full name, county (searchable picker of 47 counties), national ID number (7–8 digits), primary crop (icon tiles). New users go here after OTP; any existing policyholder's phone number skips to Home. If the ID number entered already belongs to a policyholder, registration stops with "This ID already has a policy with us" and a *Find my policy* button.
 
 ### 2.2 Home (`/home`)
 - Greeting with farmer name and a today weather strip (icon, temp, rain chance).
@@ -122,10 +123,13 @@ Real backend, real OTP or M-Pesa integration, Gemini AI features, Swahili copy, 
 
 ## 6. Mock data
 
-Seeded farmer *Wanjiru Kamau*, phone `+254712345678`, county Nakuru, with three farms telling different stories:
-1. **Maize, Nakuru** — insured (Standard), healthy, NDVI in range.
-2. **Beans, Machakos** — insured (Basic), drought stress (SPI ≈ −1.6), one payout in stage *approved*.
-3. **Tea, Kericho** — uninsured; the upsell path.
+Three existing policyholders, each reachable by phone, national ID or policy number:
+
+| Farmer | Phone | National ID | Policy number(s) | Story |
+| --- | --- | --- | --- | --- |
+| Wanjiru Kamau, Nakuru | `+254712345678` | `28765431` | `AGR-2026-004417` (maize), `AGR-2026-001982` (beans) | Three farms: maize insured (Standard), healthy; beans in Machakos, drought stress, payout *approved* and unread; tea in Kericho uninsured (upsell) |
+| Kipkoech Langat, Kericho | `+254722111222` | `31234567` | `AGR-2025-007731` (tea) | One tea farm; Standard cover from the 2025 long rains has **expired** — the renewal path |
+| Achieng Otieno, Makueni | `+254733444555` | `29876543` | `AGR-2026-003150` (maize) | One maize farm hit by drought; payout **sent** to M-Pesa (already seen) |
 
 Plus 10-year yield histories per county/crop and weekly monitoring series for the current season. Any other phone number is treated as a new user and goes through registration with an empty farm list.
 
