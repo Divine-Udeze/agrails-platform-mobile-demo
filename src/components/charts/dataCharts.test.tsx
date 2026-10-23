@@ -1,12 +1,27 @@
-import { render, screen } from '@testing-library/react'
+import { fireEvent, render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { BarChart } from '@/src/components/charts/BarChart'
+import { CHAR_W } from '@/src/components/charts/geometry'
 import { Donut } from '@/src/components/charts/Donut'
 import { LineChart } from '@/src/components/charts/LineChart'
 import { RangeStrip } from '@/src/components/charts/RangeStrip'
 
-test('LineChart draws band and marker and shows a tooltip on tap', async () => {
-  const user = userEvent.setup()
+/** Taps the LineChart plot at an x in viewBox units (the mocked rect is 320 wide). */
+function tapPlot(x: number) {
+  const plot = screen.getByTestId('plot-hit')
+  plot.getBoundingClientRect = () =>
+    ({
+      left: 0,
+      top: 0,
+      width: 320,
+      height: 190,
+      right: 320,
+      bottom: 190,
+    }) as DOMRect
+  fireEvent.click(plot, { clientX: x, clientY: 80 })
+}
+
+test('LineChart draws band and marker and shows a tooltip on tap', () => {
   render(
     <LineChart
       values={[0.3, 0.5, 0.7]}
@@ -21,10 +36,10 @@ test('LineChart draws band and marker and shows a tooltip on tap', async () => {
   expect(screen.getByRole('img', { name: 'Crop health' })).toBeInTheDocument()
   expect(screen.getByText('Healthy range')).toBeInTheDocument()
   expect(screen.getByText('Today')).toBeInTheDocument()
-  await user.click(screen.getByTestId('hit-1'))
+  tapPlot(150)
   expect(screen.getByRole('status')).toHaveTextContent('8 Sep')
   expect(screen.getByRole('status')).toHaveTextContent('0.50')
-  await user.click(screen.getByTestId('hit-1'))
+  tapPlot(150)
   expect(screen.queryByRole('status')).not.toBeInTheDocument()
 })
 
@@ -65,6 +80,23 @@ test('RangeStrip flags rows and shows the threshold', () => {
   const svg = screen.getByRole('img', { name: 'Temperature' })
   expect(svg.querySelectorAll('[data-flagged="true"]')).toHaveLength(1)
   expect(screen.getByText('32°C')).toBeInTheDocument()
+})
+
+test('RangeStrip threshold line lets taps through to the rows', () => {
+  render(
+    <RangeStrip
+      rows={[{ label: '1 Sep', min: 13, max: 34, flagged: true }]}
+      unit='°C'
+      threshold={{ value: 32, label: '32°C' }}
+      ariaLabel='Temperature'
+    />,
+  )
+  const svg = screen.getByRole('img', { name: 'Temperature' })
+  expect(svg.querySelector('line[stroke-dasharray]')?.closest('g')).toHaveStyle(
+    {
+      pointerEvents: 'none',
+    },
+  )
 })
 
 test('BarChart draws the reference label on a pill after the bars', () => {
@@ -159,4 +191,255 @@ test('Donut steps the centre text down for long figures', () => {
     />,
   )
   expect(screen.getByText('294,000')).toHaveAttribute('data-size', 'sm')
+})
+
+const WEEKS = Array.from({ length: 5 }, (_, i) => `${i + 1} Sep`)
+const lineProps = {
+  values: [0.3, 0.5, 0.7, 0.6, 0.4],
+  labels: WEEKS,
+  formatValue: (v: number) => v.toFixed(2),
+  ariaLabel: 'Line',
+}
+
+test('LineChart: tapping between points selects the nearest one', () => {
+  render(<LineChart {...lineProps} />)
+  // x for index i is 36 + i * 68 (W 320, pads 36 and 12); 36 + 68 * 1.4 = 131
+  tapPlot(131)
+  expect(screen.getByRole('status')).toHaveTextContent('2 Sep')
+  tapPlot(180) // between index 2 (172) and 3 (240), nearer 2
+  expect(screen.getByRole('status')).toHaveTextContent('3 Sep')
+  tapPlot(215) // nearer index 3
+  expect(screen.getByRole('status')).toHaveTextContent('4 Sep')
+})
+
+test('LineChart: taps beyond the plot edges select the first and last point', () => {
+  render(<LineChart {...lineProps} />)
+  tapPlot(2)
+  expect(screen.getByRole('status')).toHaveTextContent('1 Sep')
+  tapPlot(319)
+  expect(screen.getByRole('status')).toHaveTextContent('5 Sep')
+})
+
+const PLOT_TOP = 28
+
+function headerOf() {
+  const key = screen.getByTestId('band-key')
+  return { key, text: key.nextElementSibling as Element }
+}
+
+test('LineChart: band key and Today sit in a header above the plot', () => {
+  render(
+    <LineChart
+      {...lineProps}
+      yDomain={[0, 1]}
+      band={{ from: 0.45, to: 0.85, label: 'Healthy range' }}
+      markerIndex={4}
+      markerLabel='Today'
+    />,
+  )
+  const { key, text } = headerOf()
+  const today = screen.getByText('Today')
+  expect(text).toHaveTextContent('Healthy range')
+  // swatch and baselines are above the plot top
+  expect(
+    Number(key.getAttribute('y')) + Number(key.getAttribute('height')),
+  ).toBeLessThanOrEqual(PLOT_TOP)
+  expect(Number(text.getAttribute('y'))).toBeLessThan(PLOT_TOP)
+  expect(Number(today.getAttribute('y'))).toBeLessThan(PLOT_TOP)
+  // key on the left, Today right-aligned, and they do not collide
+  expect(today).toHaveAttribute('text-anchor', 'end')
+  const keyEnd =
+    Number(text.getAttribute('x')) + 'Healthy range'.length * CHAR_W
+  const todayStart = Number(today.getAttribute('x')) - 'Today'.length * CHAR_W
+  expect(keyEnd).toBeLessThan(todayStart)
+  // no pill inside the plot, and the line never enters the header
+  expect(screen.queryByTestId('band-pill')).not.toBeInTheDocument()
+  const ys = (screen.getByTestId('line-path').getAttribute('d') ?? '')
+    .split(/[ML]/)
+    .filter(Boolean)
+    .map((p) => Number(p.trim().split(' ')[1]))
+  ys.forEach((y) => expect(y).toBeGreaterThanOrEqual(PLOT_TOP))
+})
+
+test('LineChart: Today follows a middle marker, centred on it', () => {
+  render(
+    <LineChart
+      {...lineProps}
+      band={{ from: 0.45, to: 0.85, label: 'Normal' }}
+      markerIndex={2}
+      markerLabel='Today'
+    />,
+  )
+  const today = screen.getByTestId('marker-label')
+  expect(today).toHaveAttribute('text-anchor', 'middle')
+  expect(Number(today.getAttribute('x'))).toBe(36 + 68 * 2)
+})
+
+test('LineChart: Today is start-aligned for a left marker when clear of the key', () => {
+  render(<LineChart {...lineProps} markerIndex={0} markerLabel='Today' />)
+  const today = screen.getByTestId('marker-label')
+  expect(today).toHaveAttribute('text-anchor', 'start')
+  expect(Number(today.getAttribute('x'))).toBe(36)
+})
+
+test('LineChart: Today drops to the right edge if it would hit the band key', () => {
+  render(
+    <LineChart
+      {...lineProps}
+      band={{ from: 0.45, to: 0.85, label: 'Healthy range' }}
+      markerIndex={0}
+      markerLabel='Today'
+    />,
+  )
+  const today = screen.getByTestId('marker-label')
+  expect(today).toHaveAttribute('text-anchor', 'end')
+  expect(Number(today.getAttribute('x'))).toBe(320 - 12)
+})
+
+test('LineChart: Today stays inside the chart for a right marker', () => {
+  render(<LineChart {...lineProps} markerIndex={4} markerLabel='Today' />)
+  const today = screen.getByTestId('marker-label')
+  expect(today).toHaveAttribute('text-anchor', 'end')
+  expect(Number(today.getAttribute('x'))).toBeLessThanOrEqual(320)
+})
+
+test('LineChart: a series starting inside the band cannot cover its label', () => {
+  render(
+    <LineChart
+      {...lineProps}
+      values={[0, 0.1, -0.2, 0.3, 0.2]}
+      yDomain={[-3, 3]}
+      band={{ from: -1, to: 1, label: 'Normal' }}
+    />,
+  )
+  const { key, text } = headerOf()
+  expect(text).toHaveTextContent('Normal')
+  expect(Number(key.getAttribute('x'))).toBeGreaterThanOrEqual(36)
+  expect(Number(text.getAttribute('y'))).toBeLessThan(PLOT_TOP)
+})
+
+const dated = (n: number) =>
+  Array.from({ length: n }, (_, i) => ({
+    label: `${((i * 7 + 6) % 28) + 1} Jul`,
+    value: 20 + i,
+  }))
+const barLabels = (svg: Element) =>
+  [...svg.querySelectorAll('text')]
+    .map((t) => t.textContent)
+    .filter((t) => /Jul/.test(t ?? ''))
+
+test('BarChart thins x labels that would overlap, keeping first and last', () => {
+  const bars = dated(16)
+  render(
+    <BarChart bars={bars} formatValue={(v) => `${v} mm`} ariaLabel='Weekly' />,
+  )
+  const shown = barLabels(screen.getByRole('img', { name: 'Weekly' }))
+  expect(shown.length).toBeLessThan(16)
+  expect(shown.length).toBeGreaterThan(2)
+  expect(shown[0]).toBe(bars[0].label)
+  expect(shown[shown.length - 1]).toBe(bars[15].label)
+})
+
+test('BarChart x labels never sit closer than their estimated width', () => {
+  render(
+    <BarChart
+      bars={dated(16)}
+      formatValue={(v) => `${v} mm`}
+      ariaLabel='Weekly'
+    />,
+  )
+  const xs = [
+    ...screen.getByRole('img', { name: 'Weekly' }).querySelectorAll('text'),
+  ]
+    .filter((t) => /Jul/.test(t.textContent ?? ''))
+    .map((t) => Number(t.getAttribute('x')))
+  const gaps = xs.slice(1).map((x, i) => x - xs[i])
+  gaps.forEach((g) => expect(g).toBeGreaterThanOrEqual(6 * CHAR_W))
+})
+
+test('BarChart shows every label when they fit (10 short year labels)', () => {
+  const bars = Array.from({ length: 10 }, (_, i) => ({
+    label: String(16 + i),
+    value: 2 + i / 10,
+  }))
+  render(
+    <BarChart bars={bars} formatValue={(v) => `${v} t`} ariaLabel='Years' />,
+  )
+  const svg = screen.getByRole('img', { name: 'Years' })
+  bars.forEach((b) =>
+    expect(
+      [...svg.querySelectorAll('text')].some((t) => t.textContent === b.label),
+    ).toBe(true),
+  )
+})
+
+test('BarChart shows both labels with two bars', () => {
+  render(
+    <BarChart
+      bars={[
+        { label: 'Today', value: 2 },
+        { label: 'Later', value: 3 },
+      ]}
+      formatValue={(v) => `${v}`}
+      ariaLabel='Two'
+    />,
+  )
+  expect(screen.getByText('Today')).toBeInTheDocument()
+  expect(screen.getByText('Later')).toBeInTheDocument()
+})
+
+test('RangeStrip anchors the threshold label inside the card when near the right edge', () => {
+  render(
+    <RangeStrip
+      rows={[
+        { label: '1 Sep', min: 13, max: 33 },
+        { label: '8 Sep', min: 14, max: 34, flagged: true },
+      ]}
+      unit='°C'
+      threshold={{ value: 32, label: 'Heat stress' }}
+      ariaLabel='Temperature'
+    />,
+  )
+  const label = screen.getByText('Heat stress')
+  const line = screen
+    .getByRole('img', { name: 'Temperature' })
+    .querySelector('line[stroke-dasharray]') as Element
+  expect(label).toHaveAttribute('text-anchor', 'end')
+  expect(Number(label.getAttribute('x'))).toBeLessThan(
+    Number(line.getAttribute('x1')),
+  )
+})
+
+test('RangeStrip keeps the threshold label to the right when there is room', () => {
+  render(
+    <RangeStrip
+      rows={[
+        { label: '1 Sep', min: 5, max: 20 },
+        { label: '8 Sep', min: 6, max: 45 },
+      ]}
+      unit='°C'
+      threshold={{ value: 10, label: 'Heat' }}
+      ariaLabel='Temperature'
+    />,
+  )
+  expect(screen.getByText('Heat')).not.toHaveAttribute('text-anchor', 'end')
+})
+
+test('RangeStrip: the threshold pill sits above the first row', () => {
+  render(
+    <RangeStrip
+      rows={[
+        { label: '1 Sep', min: 13, max: 33 },
+        { label: '8 Sep', min: 14, max: 34, flagged: true },
+      ]}
+      unit='°C'
+      threshold={{ value: 32, label: 'Heat stress' }}
+      ariaLabel='Temperature'
+    />,
+  )
+  const pill = screen.getByTestId('threshold-pill')
+  const firstHit = screen.getByTestId('hit-0')
+  expect(
+    Number(pill.getAttribute('y')) + Number(pill.getAttribute('height')),
+  ).toBeLessThanOrEqual(Number(firstHit.getAttribute('y')))
 })

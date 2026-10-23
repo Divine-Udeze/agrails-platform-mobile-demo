@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { CHAR_W } from '@/src/components/charts/geometry'
 import { ChartTooltip } from '@/src/components/charts/ChartTooltip'
 import styles from '@/src/components/charts/charts.module.css'
 import { linearScale, niceTicks } from '@/src/components/charts/scale'
@@ -22,7 +23,6 @@ interface Props {
 
 const W = 320
 const PAD = { l: 36, r: 12, t: 22, b: 26 }
-const CHAR_W = 6.6
 
 export function BarChart({
   bars,
@@ -52,7 +52,8 @@ export function BarChart({
   const refY = reference
     ? Math.max(2, Math.min(y(reference.value) - 24, height - PAD.b - 20))
     : 0
-  const every = Math.ceil(n / 8)
+  const labelW = Math.max(0, ...bars.map((b) => b.label.length)) * CHAR_W + 8
+  const every = Math.max(1, Math.ceil(labelW / slot))
 
   return (
     <div className={styles.chart}>
@@ -153,7 +154,7 @@ export function BarChart({
           </g>
         )}
         {bars.map((b, i) =>
-          i % every === 0 || i === n - 1 ? (
+          i === n - 1 || (i % every === 0 && n - 1 - i >= every) ? (
             <text
               key={b.label}
               className={styles.axisText}

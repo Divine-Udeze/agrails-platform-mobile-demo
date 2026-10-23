@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { CHAR_W } from '@/src/components/charts/geometry'
 import { ChartTooltip } from '@/src/components/charts/ChartTooltip'
 import styles from '@/src/components/charts/charts.module.css'
 import { linearScale, niceTicks } from '@/src/components/charts/scale'
@@ -20,7 +21,10 @@ interface Props {
 const W = 320
 const LABEL_W = 52
 const ROW_H = 22
-const TOP = 22
+/** axis tick row (y 0-20), then a header row for the threshold label, then the data rows */
+const HEADER_Y = 22
+const HEADER_H = 18
+const TOP = HEADER_Y + HEADER_H + 4
 
 export function RangeStrip({ rows, unit, ariaLabel, threshold }: Props) {
   const [active, setActive] = useState<number | null>(null)
@@ -28,6 +32,9 @@ export function RangeStrip({ rows, unit, ariaLabel, threshold }: Props) {
   const hi = Math.max(...rows.map((r) => r.max), threshold?.value ?? -Infinity)
   const ticks = niceTicks(lo, hi, 4)
   const x = linearScale([ticks[0], ticks[ticks.length - 1]], [LABEL_W, W - 12])
+  const thresholdX = threshold ? x(threshold.value) : 0
+  const labelW = threshold ? Math.ceil(threshold.label.length * CHAR_W) : 0
+  const flip = !!threshold && thresholdX + 14 + labelW > W
   const height = TOP + rows.length * ROW_H + 6
 
   return (
@@ -86,20 +93,30 @@ export function RangeStrip({ rows, unit, ariaLabel, threshold }: Props) {
           )
         })}
         {threshold && (
-          <g>
+          <g style={{ pointerEvents: 'none' }}>
             <line
               x1={x(threshold.value)}
               x2={x(threshold.value)}
-              y1={TOP - 4}
+              y1={HEADER_Y + HEADER_H}
               y2={height}
               stroke='var(--danger)'
               strokeWidth={1.5}
               strokeDasharray='4 3'
             />
+            <rect
+              data-testid='threshold-pill'
+              className={styles.refPill}
+              x={flip ? thresholdX - 4 - labelW - 8 : thresholdX + 2}
+              y={HEADER_Y}
+              width={labelW + 12}
+              height={HEADER_H}
+              rx={9}
+            />
             <text
               className={styles.refText}
-              x={x(threshold.value) + 4}
-              y={TOP + 8}
+              x={thresholdX + (flip ? -4 : 4)}
+              y={HEADER_Y + 13}
+              textAnchor={flip ? 'end' : 'start'}
             >
               {threshold.label}
             </text>

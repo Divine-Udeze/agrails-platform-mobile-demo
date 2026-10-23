@@ -332,6 +332,57 @@ export const en = {
   'conf.receipt': 'M-Pesa receipt',
   'conf.goFarm': 'Go to my farm',
   'conf.allPolicies': 'See all my policies',
+  'mon.title': 'Farm health',
+  'mon.tabs': 'Farm health views',
+  'mon.intro': 'Updated every week from satellite and weather data.',
+  'mon.updated': 'Updated {date}',
+  'mon.allGood': 'All signals look good',
+  'mon.emptyTitle': 'No farms to watch yet',
+  'mon.emptyBody': 'Add a farm and we will start watching it from space.',
+  'mon.tab.ndvi': 'Crop health',
+  'mon.tab.rain': 'Rainfall',
+  'mon.tab.spi': 'Drought',
+  'mon.tab.heat': 'Temperature',
+  'mon.signal.ndvi': 'Crop: {label}',
+  'mon.signal.rainLow': 'Rain {pct}% below normal',
+  'mon.signal.rainHigh': 'Rain {pct}% above normal',
+  'mon.signal.rainOk': 'Rain near normal',
+  'mon.signal.spi': 'Drought index: {label}',
+  'mon.signal.heat': '{n} very hot weeks',
+  'mon.signal.noHeat': 'No heat stress',
+  'mon.ndvi.good':
+    'Your {crop} is growing well. It is greener than {pct}% of farms nearby.',
+  'mon.ndvi.warning':
+    'Your {crop} is showing stress. Check for pests, and water if you can.',
+  'mon.ndvi.danger':
+    'Your {crop} is in poor health. Greenness has dropped sharply.',
+  'mon.ndvi.chart': 'Crop greenness (NDVI) by week',
+  'mon.ndvi.band': 'Healthy range',
+  'mon.ndvi.today': 'Today',
+  'mon.ndvi.explain':
+    'Greenness (NDVI) is measured by satellite. Higher means healthier plants.',
+  'mon.rain.low': 'Rain was {pct}% below normal in the last 4 weeks.',
+  'mon.rain.high': 'Rain was {pct}% above normal in the last 4 weeks.',
+  'mon.rain.ok': 'Rainfall is close to normal for this time of year.',
+  'mon.rain.chart': 'Weekly rainfall in mm',
+  'mon.rain.normal': 'Normal',
+  'mon.rain.actual': 'This season {n}\u00a0mm',
+  'mon.rain.normalTotal': 'Normal {n}\u00a0mm',
+  'mon.spi.good': 'No drought. Soil moisture is close to normal.',
+  'mon.spi.warning':
+    'Conditions are drier (or wetter) than normal. Keep watching.',
+  'mon.spi.danger':
+    'Your area is in drought. If harvests fail, your insurance can pay out.',
+  'mon.spi.gauge': 'Drought index (SPI) {value}',
+  'mon.spi.dry': 'Very dry',
+  'mon.spi.wet': 'Very wet',
+  'mon.spi.chart': 'Drought index by week',
+  'mon.spi.band': 'Normal',
+  'mon.heat.some':
+    'There were {n} very hot weeks (above {t}°C). Heat can harm flowering.',
+  'mon.heat.none': 'No heat stress in the last 8 weeks.',
+  'mon.heat.chart': 'Weekly lowest and highest temperature',
+  'mon.heat.threshold': 'Heat stress',
 }
 
 export type StringKey = keyof typeof en
