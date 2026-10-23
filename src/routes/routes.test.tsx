@@ -1,5 +1,6 @@
-import { render, screen, waitFor } from '@testing-library/react'
-import { MemoryRouter, useLocation } from 'react-router-dom'
+import { render, screen, waitFor, within } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
+import { MemoryRouter, useLocation, useNavigate } from 'react-router-dom'
 import { AppRoutes } from '@/src/App'
 import { AppProvider } from '@/src/context/AppContext'
 import { initialState } from '@/src/context/reducer'
@@ -63,4 +64,46 @@ test('unknown paths show Not Found', async () => {
   expect(
     await screen.findByText("We couldn't find that page"),
   ).toBeInTheDocument()
+})
+
+function GoTo({ to }: { to: string }) {
+  const navigate = useNavigate()
+  return (
+    <button type='button' onClick={() => navigate(to)}>
+      go to {to}
+    </button>
+  )
+}
+
+test('after logging out the guards keep the farmer out of /home', async () => {
+  const user = userEvent.setup()
+  render(
+    <AppProvider initialState={seededState()}>
+      <MemoryRouter
+        initialEntries={['/profile']}
+        future={{ v7_startTransition: true, v7_relativeSplatPath: true }}
+      >
+        <Where />
+        <GoTo to='/home' />
+        <AppRoutes />
+      </MemoryRouter>
+    </AppProvider>,
+  )
+  await user.click(await screen.findByRole('button', { name: 'Log out' }))
+  await user.click(
+    within(screen.getByRole('dialog')).getByRole('button', { name: 'Log out' }),
+  )
+  await waitFor(() =>
+    expect(screen.getByTestId('where')).toHaveTextContent(/^\/$/),
+  )
+  await user.click(screen.getByRole('button', { name: 'go to /home' }))
+  await waitFor(() =>
+    expect(screen.getByTestId('where')).toHaveTextContent(/^\/$/),
+  )
+  expect(screen.queryByText('Wanjiru Kamau')).not.toBeInTheDocument()
+})
+
+test('the profile, policies and policy routes render real pages', async () => {
+  renderAt('/policy/policy-maize', seededState())
+  expect(await screen.findByText('AGR-2026-004417')).toBeInTheDocument()
 })

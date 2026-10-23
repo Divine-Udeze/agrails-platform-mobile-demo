@@ -15,10 +15,12 @@ import { t, type StringKey } from '@/src/i18n'
 import NotFound from '@/src/pages/NotFound'
 import styles from '@/src/pages/insurance/insurance.module.css'
 import { planFromSearch, useQuotes } from '@/src/pages/insurance/useQuote'
-import { formatDate, formatKES, formatNumber } from '@/src/utils/format'
-
-/** keeps "KES 2,520" on one line */
-const money = (v: number) => formatKES(v).replace(' ', '\u00a0')
+import {
+  formatDate,
+  formatKES,
+  formatKESNoWrap,
+  formatNumber,
+} from '@/src/utils/format'
 
 export default function PremiumQuote() {
   const { farmId } = useParams()
@@ -81,7 +83,7 @@ export default function PremiumQuote() {
             </div>
             <div className={`figure ${styles.heroFigure}`}>
               {t('quote.youPayBig', {
-                amount: money(quote.farmerPremiumKES),
+                amount: formatKESNoWrap(quote.farmerPremiumKES),
               })}
             </div>
             <div>{t('quote.subsidyNote')}</div>

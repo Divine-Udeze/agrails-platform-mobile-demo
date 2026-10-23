@@ -37,6 +37,16 @@ export function payoutAmount(
 /** Kenya is UTC+3 all year (no daylight saving). */
 const NAIROBI_OFFSET_MS = 3 * 3600_000
 const DAY_MS = 86_400_000
+
+/** The Nairobi calendar date of `now`, as ms at UTC midnight (matches stored dates). */
+export function nairobiMidnight(now: Date = new Date()): number {
+  const local = new Date(now.getTime() + NAIROBI_OFFSET_MS)
+  return Date.UTC(
+    local.getUTCFullYear(),
+    local.getUTCMonth(),
+    local.getUTCDate(),
+  )
+}
 /** With less cover than this left in the running season, quote next season. */
 const MIN_COVER_DAYS = 30
 
@@ -47,13 +57,9 @@ const MIN_COVER_DAYS = 30
  */
 export function coverageWindow(season: Season, today: Date = new Date()) {
   const { startMonth, endMonth } = SEASON_WINDOWS[season]
-  const local = new Date(today.getTime() + NAIROBI_OFFSET_MS)
+  const todayMidnight = nairobiMidnight(today)
+  const local = new Date(todayMidnight)
   const month = local.getUTCMonth()
-  const todayMidnight = Date.UTC(
-    local.getUTCFullYear(),
-    month,
-    local.getUTCDate(),
-  )
   let year = local.getUTCFullYear()
   let start = Date.UTC(year, startMonth, 1)
   if (month > endMonth) {

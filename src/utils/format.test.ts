@@ -4,6 +4,7 @@ import {
   formatDate,
   formatHa,
   formatKES,
+  formatKESNoWrap,
   formatNumber,
   formatPhone,
   formatShortDate,
@@ -63,4 +64,11 @@ test('formats plain numbers with grouping', () => {
   expect(formatNumber(12500)).toBe('12,500')
   expect(formatNumber(999.6)).toBe('1,000')
   expect(formatNumber(0)).toBe('0')
+})
+
+describe('formatKESNoWrap', () => {
+  test('keeps KES and the amount together with a non-breaking space', () => {
+    expect(formatKESNoWrap(10800)).toBe('KES 10,800')
+    expect(formatKESNoWrap(10800)).toBe(formatKES(10800).replace(' ', ' '))
+  })
 })

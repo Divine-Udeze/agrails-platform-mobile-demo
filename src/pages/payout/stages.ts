@@ -3,7 +3,7 @@ import type { TimelineStep } from '@/src/components/common/ProgressTimeline'
 import { useApp } from '@/src/context/AppContext'
 import { t } from '@/src/i18n'
 import type { Payout, PayoutStage } from '@/src/types'
-import { formatDate, formatKES } from '@/src/utils/format'
+import { formatDate, formatKESNoWrap } from '@/src/utils/format'
 
 export const PAYOUT_STAGES: PayoutStage[] = [
   'triggered',
@@ -37,7 +37,7 @@ export function latestDate(payout: Payout): string {
 }
 
 /** KES amount that never wraps between "KES" and the number. */
-export const money = (v: number) => formatKES(v).replace(' ', '\u00a0')
+export { formatKESNoWrap as money }
 
 /** Marks a payout read once it is opened (depends on primitives so it cannot loop). */
 export function useMarkPayoutRead(payout: Payout | undefined) {

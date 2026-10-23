@@ -19,6 +19,11 @@ export function formatKES(amount: number): string {
   return `KES ${Math.round(amount).toLocaleString('en-US')}`
 }
 
+/** KES amount that never wraps between "KES" and the number. */
+export function formatKESNoWrap(amount: number): string {
+  return formatKES(amount).replace(' ', '\u00a0')
+}
+
 export function haToAcres(ha: number): number {
   return ha * HA_TO_ACRES
 }

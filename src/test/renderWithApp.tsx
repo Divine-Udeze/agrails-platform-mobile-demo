@@ -4,7 +4,7 @@ import { Fragment, StrictMode, type ReactElement } from 'react'
 import { MemoryRouter, Route, Routes, useLocation } from 'react-router-dom'
 import { AppProvider } from '@/src/context/AppContext'
 import { initialState } from '@/src/context/reducer'
-import { buildSeedData } from '@/src/data/mockData'
+import { buildAccounts, buildSeedData } from '@/src/data/mockData'
 import type { AppState } from '@/src/types'
 
 export function seededState(): AppState {
@@ -12,6 +12,17 @@ export function seededState(): AppState {
   return {
     ...initialState,
     auth: { isAuthenticated: true, phone: data.farmer.phone, isNewUser: false },
+    ...data,
+  }
+}
+
+/** Signed-in state for one of the seeded accounts, found by phone number. */
+export function accountState(phone: string): AppState {
+  const data = buildAccounts().find((a) => a.farmer.phone === phone)
+  if (!data) throw new Error(`No seeded account for ${phone}`)
+  return {
+    ...initialState,
+    auth: { isAuthenticated: true, phone, isNewUser: false },
     ...data,
   }
 }

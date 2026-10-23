@@ -2,6 +2,7 @@ import type { Farm } from '@/src/types'
 import {
   buildQuote,
   coverageWindow,
+  nairobiMidnight,
   payoutAmount,
   premiumBreakdown,
   roundTo10,
@@ -126,5 +127,16 @@ test('buildQuote combines all pricing rules', () => {
     coverageStart: '2027-03-01T00:00:00.000Z',
     coverageEnd: '2027-07-31T00:00:00.000Z',
     exampleAt50PctKES: 28800,
+  })
+})
+
+describe('nairobiMidnight', () => {
+  test('is the Nairobi calendar date at UTC midnight', () => {
+    expect(nairobiMidnight(new Date('2026-12-30T20:59:59.000Z'))).toBe(
+      Date.UTC(2026, 11, 30),
+    )
+    expect(nairobiMidnight(new Date('2026-12-30T21:00:00.000Z'))).toBe(
+      Date.UTC(2026, 11, 31),
+    )
   })
 })

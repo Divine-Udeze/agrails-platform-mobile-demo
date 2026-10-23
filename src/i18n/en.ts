@@ -418,6 +418,42 @@ export const en = {
     'If harvests in your area fall below your cover level, your payouts will appear here.',
   'payout.yieldUnit': '{v} t/ha',
   'payout.unknownFarm': 'Your farm',
+  'profile.title': 'Profile',
+  'profile.policies': 'My policies',
+  'profile.payouts': 'My payouts',
+  'profile.language': 'Language',
+  'profile.english': 'English',
+  'profile.swahili': 'Kiswahili — coming soon',
+  'profile.help': 'Help',
+  'profile.logout': 'Log out',
+  'profile.logoutConfirm': 'Log out?',
+  'profile.logoutBody':
+    'You will need your phone number and a code to sign in again.',
+  'help.q1': 'What is area yield insurance?',
+  'help.a1':
+    'It pays you when the harvest in your whole area falls below normal, measured by satellites and field surveys. You do not need to make a claim.',
+  'help.q2': 'When do I get paid?',
+  'help.a2':
+    'After harvest, once the area results are confirmed. The money goes straight to your M-Pesa.',
+  'help.q3': 'What if only my farm has a problem?',
+  'help.a3':
+    'This cover is for problems that hit the whole area, like drought or floods. Losses on one farm only are not covered.',
+  'policies.title': 'My policies',
+  'policies.emptyTitle': 'No policies yet',
+  'policies.emptyBody': 'Insure a farm to protect your harvest.',
+  'policies.insureCta': 'Insure a farm',
+  'policies.addFarmCta': 'Add a farm',
+  'policies.unknownFarm': 'Your farm',
+  'policy.title': 'Policy',
+  'policy.coverage': 'Cover period',
+  'policy.startsIn': 'Starts in {n} days',
+  'policy.startsTomorrow': 'Starts tomorrow',
+  'policy.daysLeft': '{n} days left',
+  'policy.dayLeft': '1 day left',
+  'policy.lastDay': 'Last day of cover',
+  'policy.ended': 'Ended {date}',
+  'policy.payouts': 'Payouts on this policy',
+  'policy.openFarm': 'Open farm',
 }
 
 export type StringKey = keyof typeof en
