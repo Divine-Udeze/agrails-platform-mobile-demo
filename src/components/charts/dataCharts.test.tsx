@@ -1,6 +1,7 @@
+import { readFileSync } from 'node:fs'
 import { fireEvent, render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { BarChart } from '@/src/components/charts/BarChart'
+import { BarChart, HEX, whiteOnBar } from '@/src/components/charts/BarChart'
 import { CHAR_W } from '@/src/components/charts/geometry'
 import { Donut } from '@/src/components/charts/Donut'
 import { LineChart } from '@/src/components/charts/LineChart'
@@ -442,4 +443,180 @@ test('RangeStrip: the threshold pill sits above the first row', () => {
   expect(
     Number(pill.getAttribute('y')) + Number(pill.getAttribute('height')),
   ).toBeLessThanOrEqual(Number(firstHit.getAttribute('y')))
+})
+
+describe('BarChart showValues avoids the reference line and pill', () => {
+  const num = (e: Element | null, a: string) => Number(e!.getAttribute(a))
+  const box = (svg: Element, name: string) => {
+    const el = svg.querySelector(`[data-value="${name}"]`)!
+    const w = (el.textContent ?? '').length * 6.6 * (14 / 12)
+    const x = num(el, 'x')
+    return {
+      el,
+      x1: x - w / 2,
+      x2: x + w / 2,
+      y1: num(el, 'y') - 12,
+      y2: num(el, 'y') + 3,
+    }
+  }
+  const pillBox = (svg: Element) => {
+    const p = svg.querySelector('[data-testid="ref-pill"]')
+    return {
+      x1: num(p, 'x'),
+      x2: num(p, 'x') + num(p, 'width'),
+      y1: num(p, 'y'),
+      y2: num(p, 'y') + num(p, 'height'),
+    }
+  }
+  const overlap = (
+    a: { x1: number; x2: number; y1: number; y2: number },
+    b: { x1: number; x2: number; y1: number; y2: number },
+  ) => a.x1 < b.x2 && a.x2 > b.x1 && a.y1 < b.y2 && a.y2 > b.y1
+
+  const draw = (
+    bars: { label: string; value: number; color?: string }[],
+    ref: number,
+  ) => {
+    render(
+      <BarChart
+        bars={bars}
+        showValues
+        reference={{ value: ref, label: 'Payout level 60%' }}
+        formatValue={(v) => `${v} t/ha`}
+        ariaLabel='Cmp'
+      />,
+    )
+    return screen.getByRole('img', { name: 'Cmp' })
+  }
+
+  test('a label near the line moves inside a tall bar, in white', () => {
+    const svg = draw(
+      [
+        { label: 'Normal', value: 1.2 },
+        { label: 'Season', value: 0.54, color: '#c62828' },
+      ],
+      0.72,
+    )
+    const el = svg.querySelector('[data-value="Season"]')!
+    expect(el).toHaveAttribute('data-placement', 'inside')
+    expect(el.getAttribute('class')).toMatch(/valueTextInside/)
+    const bar = svg.querySelector('[data-bar="Season"]')!
+    expect(num(el, 'y')).toBeGreaterThan(num(bar, 'y'))
+    expect(num(el, 'y')).toBeLessThan(num(bar, 'y') + num(bar, 'height'))
+  })
+
+  test('a label near the line under a short bar sits just below the line', () => {
+    const svg = draw(
+      [
+        { label: 'Normal', value: 10 },
+        { label: 'Season', value: 1 },
+      ],
+      1.3,
+    )
+    const el = svg.querySelector('[data-value="Season"]')!
+    expect(el).toHaveAttribute('data-placement', 'below')
+    const line = svg.querySelector('line[stroke-dasharray]')!
+    expect(num(el, 'y')).toBeGreaterThan(num(line, 'y1'))
+    expect(overlap(box(svg, 'Season'), pillBox(svg))).toBe(false)
+  })
+
+  test('labels away from the line stay above their bars', () => {
+    const svg = draw(
+      [
+        { label: 'Normal', value: 10 },
+        { label: 'Season', value: 5 },
+      ],
+      2,
+    )
+    expect(svg.querySelector('[data-value="Normal"]')).toHaveAttribute(
+      'data-placement',
+      'above',
+    )
+    expect(svg.querySelector('[data-value="Season"]')).toHaveAttribute(
+      'data-placement',
+      'above',
+    )
+  })
+
+  test('the pill moves off a value label it would cover', () => {
+    const svg = draw(
+      [
+        { label: 'Low', value: 6 },
+        { label: 'High', value: 10 },
+      ],
+      9.2,
+    )
+    const pill = pillBox(svg)
+    expect(overlap(box(svg, 'Low'), pill)).toBe(false)
+    expect(overlap(box(svg, 'High'), pill)).toBe(false)
+    // by default it sits flush right; it had to move to the roomier side
+    expect(pill.x2).toBeLessThan(320 - 12)
+  })
+})
+
+describe('BarChart inside-label contrast', () => {
+  const inside = (color?: string) => {
+    render(
+      <BarChart
+        bars={[
+          { label: 'Normal', value: 1.2 },
+          { label: 'Season', value: 0.54, color },
+        ]}
+        showValues
+        reference={{ value: 0.72, label: 'Level' }}
+        formatValue={(v) => `${v}`}
+        ariaLabel='Contrast'
+      />,
+    )
+    return screen
+      .getByRole('img', { name: 'Contrast' })
+      .querySelector('[data-value="Season"]')!
+  }
+
+  test('white text inside a danger bar', () => {
+    expect(inside('#c62828').getAttribute('class')).toMatch(/valueTextInside/)
+  })
+
+  test('ink text inside a green bar', () => {
+    const el = inside('#2f9e5a')
+    expect(el).toHaveAttribute('data-placement', 'inside')
+    expect(el.getAttribute('class')).not.toMatch(/valueTextInside/)
+  })
+
+  test('the chosen text colour reaches 4.5:1 on status colours', () => {
+    const lum = (hex: string) => {
+      const c = [1, 3, 5].map((i) => {
+        const v = parseInt(hex.slice(i, i + 2), 16) / 255
+        return v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4
+      })
+      return 0.2126 * c[0] + 0.7152 * c[1] + 0.0722 * c[2]
+    }
+    for (const bar of [
+      '#2f9e5a',
+      '#c77700',
+      '#c62828',
+      ...Object.values(HEX),
+    ]) {
+      const text = whiteOnBar(bar) ? '#ffffff' : '#17201a'
+      const [a, b] = [lum(bar), lum(text)].sort((x, y) => y - x)
+      expect((a + 0.05) / (b + 0.05)).toBeGreaterThanOrEqual(4.5)
+    }
+  })
+
+  test('HEX matches tokens.css', () => {
+    const css = readFileSync('src/styles/tokens.css', 'utf8')
+    for (const [ref, hex] of Object.entries(HEX)) {
+      const name = ref.slice(4, -1)
+      expect(css).toMatch(new RegExp(`${name}:\\s*${hex};`, 'i'))
+    }
+  })
+
+  test('gold bars get ink text, at least 4.5:1', () => {
+    expect(whiteOnBar('var(--gold-500)')).toBe(false)
+    expect(whiteOnBar('#e0a526')).toBe(false)
+  })
+
+  test('unknown colours fall back to white', () => {
+    expect(whiteOnBar('rebeccapurple')).toBe(true)
+  })
 })

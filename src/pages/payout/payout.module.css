@@ -1,0 +1,99 @@
+.celebrate {
+  min-height: 100%;
+  display: flex;
+  flex-direction: column;
+  background: linear-gradient(180deg, var(--gold-100), var(--bg) 60%);
+}
+.body {
+  text-align: center;
+  padding-top: var(--sp-6);
+}
+.lead {
+  margin: 0;
+  font-size: var(--fs-lg);
+}
+.line {
+  margin: 0;
+}
+.amount {
+  font-size: 46px;
+  font-weight: 900;
+  color: var(--green-900);
+  letter-spacing: -0.02em;
+  white-space: nowrap;
+}
+.pop {
+  animation: pop 700ms var(--ease) both;
+}
+@keyframes pop {
+  from {
+    transform: scale(0.6);
+    opacity: 0;
+  }
+}
+.breakdown div {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--sp-3);
+  padding: var(--sp-2) 0;
+  border-bottom: 1px solid var(--line);
+}
+.breakdown div:last-child {
+  border-bottom: 0;
+  font-weight: 800;
+  font-size: var(--fs-lg);
+}
+.breakdown span:last-child {
+  white-space: nowrap;
+}
+.total {
+  background: linear-gradient(135deg, var(--green-700), var(--green-500));
+  color: var(--surface);
+  border-radius: var(--radius-lg);
+  padding: var(--sp-4);
+}
+.total .figure {
+  white-space: nowrap;
+}
+.item {
+  display: grid;
+  grid-template-columns: 40px minmax(0, 1fr) auto;
+  gap: var(--sp-2);
+  align-items: center;
+  min-height: var(--tap);
+}
+.itemMain {
+  display: block;
+  min-width: 0;
+}
+.itemSide {
+  text-align: right;
+}
+.block {
+  display: block;
+}
+.nowrap {
+  white-space: nowrap;
+}
+.coin {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--gold-100);
+  color: var(--soil-700);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.name {
+  display: block;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.policyLink {
+  display: flex;
+  align-items: center;
+  min-height: var(--tap);
+}

@@ -147,3 +147,7 @@
   font-size: 14px;
   font-weight: 700;
 }
+
+.valueTextInside {
+  fill: var(--surface);
+}
