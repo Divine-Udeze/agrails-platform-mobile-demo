@@ -166,3 +166,8 @@
 :global(.farm-label)::before {
   display: none;
 }
+
+.roundBtn:disabled {
+  opacity: 0.4;
+  cursor: default;
+}

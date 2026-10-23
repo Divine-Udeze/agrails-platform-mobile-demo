@@ -237,6 +237,14 @@ export const en = {
   'draw.drawMode': 'Draw',
   'draw.moveMode': 'Move map',
   'draw.redraw': 'Draw again',
+  'confirm.title': 'Check your farm',
+  'confirm.body': 'Is this the right shape and size?',
+  'confirm.save': 'Save farm',
+  'confirm.changeShape': 'Change shape',
+  'confirm.changeDetails': 'Change details',
+  'view.title': 'Farm boundary',
+  'view.perimeter': 'Edge length {m} m',
+  'view.corners': '{n} corners',
 }
 
 export type StringKey = keyof typeof en
