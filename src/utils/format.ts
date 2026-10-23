@@ -65,3 +65,10 @@ export function maskPhone(e164: string): string {
   const local = e164.replace(/^\+254/, '')
   return `+254 ${local[0]}•• ••• ${local.slice(-3)}`
 }
+
+/** Today's date as YYYY-MM-DD in the device's local time zone. */
+export function todayISO(now: Date = new Date()): string {
+  const mm = String(now.getMonth() + 1).padStart(2, '0')
+  const dd = String(now.getDate()).padStart(2, '0')
+  return `${now.getFullYear()}-${mm}-${dd}`
+}

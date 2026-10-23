@@ -5,10 +5,11 @@ import {
   formatHa,
   formatKES,
   formatPhone,
-  groupLocalPhone,
-  maskPhone,
   formatShortDate,
+  groupLocalPhone,
   haToAcres,
+  maskPhone,
+  todayISO,
 } from '@/src/utils/format'
 
 test('formats KES with thousands separators and no decimals', () => {
@@ -50,4 +51,9 @@ test.each([
 test('maskPhone hides the middle digits of the phone on file', () => {
   expect(maskPhone('+254712345678')).toBe('+254 7•• ••• 678')
   expect(maskPhone('+254722111222')).toBe('+254 7•• ••• 222')
+})
+
+test('todayISO uses local date parts', () => {
+  expect(todayISO(new Date(2026, 9, 23, 1, 30))).toBe('2026-10-23')
+  expect(todayISO(new Date(2026, 0, 5, 23, 59))).toBe('2026-01-05')
 })

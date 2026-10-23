@@ -172,3 +172,106 @@
   text-overflow: ellipsis;
   line-height: 1.25;
 }
+
+.farmHero {
+  display: flex;
+  gap: var(--sp-4);
+  align-items: center;
+  background: linear-gradient(135deg, var(--green-100), var(--soil-100));
+  border-radius: var(--radius-lg);
+  padding: var(--sp-4);
+}
+.facts {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--sp-3);
+}
+.fact {
+  background: var(--surface);
+  border-radius: var(--radius);
+  padding: var(--sp-3);
+}
+.factLabel {
+  color: var(--ink-3);
+  font-size: var(--fs-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.factValue {
+  font-weight: 800;
+}
+.linkRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 56px;
+  padding: 0 var(--sp-4);
+  background: var(--surface);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  text-decoration: none;
+  color: var(--ink);
+  font-weight: 700;
+}
+.linkRow + .linkRow {
+  margin-top: var(--sp-2);
+}
+.progress {
+  height: 8px;
+  border-radius: 999px;
+  background: var(--line);
+  overflow: hidden;
+}
+.progressFill {
+  height: 100%;
+  width: 100%;
+  background: var(--green-500);
+  transform-origin: left;
+  transition: transform 300ms var(--ease);
+}
+.seasonCard {
+  width: 100%;
+  text-align: left;
+  border: 2px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface);
+  padding: var(--sp-4);
+  cursor: pointer;
+}
+.seasonCard[aria-checked='true'] {
+  border-color: var(--green-700);
+  background: var(--green-100);
+}
+.months {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  gap: 3px;
+  margin-top: var(--sp-3);
+}
+.month {
+  text-align: center;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 6px 0;
+  border-radius: 6px;
+  background: var(--bg);
+  color: var(--ink-3);
+}
+.month[data-on='true'] {
+  background: var(--rain-400);
+  color: #fff;
+}
+
+.healthRow {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--sp-4);
+}
+
+.healthLink {
+  display: flex;
+  align-items: center;
+  min-height: 48px;
+  margin-top: var(--sp-2);
+}
