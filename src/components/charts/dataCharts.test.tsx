@@ -65,3 +65,41 @@ test('RangeStrip flags rows and shows the threshold', () => {
   expect(svg.querySelectorAll('[data-flagged="true"]')).toHaveLength(1)
   expect(screen.getByText('32°C')).toBeInTheDocument()
 })
+
+test('BarChart draws the reference label on a pill after the bars', () => {
+  render(
+    <BarChart
+      bars={[
+        { label: 'a', value: 2.5 },
+        { label: 'b', value: 1.1 },
+      ]}
+      reference={{ value: 2.3, label: 'Average 2.3 t' }}
+      formatValue={(v) => `${v} t`}
+      ariaLabel='Yield'
+    />,
+  )
+  const svg = screen.getByRole('img', { name: 'Yield' })
+  const pill = screen.getByTestId('ref-pill')
+  const text = screen.getByText('Average 2.3 t')
+  const lastBar = [...svg.querySelectorAll('[data-bar]')].pop() as Element
+  const after = (a: Element, b: Element) =>
+    a.compareDocumentPosition(b) & Node.DOCUMENT_POSITION_FOLLOWING
+  expect(after(lastBar, pill)).toBeTruthy()
+  expect(after(pill, text)).toBeTruthy()
+})
+
+test('BarChart widens the left pad for long tick labels', () => {
+  render(
+    <BarChart
+      bars={[
+        { label: 'a', value: 1000 },
+        { label: 'b', value: 500 },
+      ]}
+      formatValue={(v) => `${v} mm`}
+      ariaLabel='Rain'
+    />,
+  )
+  const svg = screen.getByRole('img', { name: 'Rain' })
+  const first = svg.querySelector('line') as Element
+  expect(Number(first.getAttribute('x1'))).toBeGreaterThan(36)
+})

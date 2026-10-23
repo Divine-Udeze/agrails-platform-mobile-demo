@@ -275,3 +275,38 @@
   min-height: 48px;
   margin-top: var(--sp-2);
 }
+
+.legendRow {
+  display: flex;
+  gap: var(--sp-2);
+  flex-wrap: wrap;
+}
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  background: var(--surface);
+  border-radius: var(--radius);
+  overflow: hidden;
+  box-shadow: var(--shadow);
+}
+.table th,
+.table td {
+  padding: var(--sp-3);
+  height: 48px;
+  text-align: right;
+  border-bottom: 1px solid var(--line);
+}
+.table th:first-child,
+.table td:first-child {
+  text-align: left;
+}
+.table th {
+  font-size: var(--fs-sm);
+  color: var(--ink-3);
+  text-transform: uppercase;
+}
+.table tr[data-bad='true'] td {
+  background: var(--danger-bg);
+  color: var(--danger);
+  font-weight: 700;
+}

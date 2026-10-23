@@ -108,3 +108,22 @@ test('Gauge needle angle follows the value', () => {
   )
   expect(screen.getByTestId('gauge-needle')).toHaveAttribute('data-angle', '90')
 })
+
+test('Gauge value label sits below the SVG, never inside it', () => {
+  render(
+    <Gauge
+      value={2.5}
+      min={0}
+      max={3}
+      bands={[{ to: 3, color: 'red' }]}
+      valueLabel='High risk'
+      ariaLabel='Risk'
+    />,
+  )
+  const svg = screen.getByRole('img', { name: 'Risk' })
+  const label = screen.getByText('High risk')
+  expect(svg.contains(label)).toBe(false)
+  expect(
+    svg.compareDocumentPosition(label) & Node.DOCUMENT_POSITION_FOLLOWING,
+  ).toBeTruthy()
+})

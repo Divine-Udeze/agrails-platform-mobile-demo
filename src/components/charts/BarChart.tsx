@@ -20,6 +20,7 @@ interface Props {
 
 const W = 320
 const PAD = { l: 36, r: 12, t: 22, b: 26 }
+const CHAR_W = 6.6
 
 export function BarChart({
   bars,
@@ -33,10 +34,19 @@ export function BarChart({
   const maxVal = Math.max(...bars.map((b) => b.value), reference?.value ?? 0)
   const ticks = niceTicks(0, maxVal || 1, 4)
   const hi = ticks[ticks.length - 1]
+  const tickLabels = ticks.map((v) => formatValue(v))
+  const padL = Math.max(
+    PAD.l,
+    Math.ceil(Math.max(...tickLabels.map((s) => s.length)) * CHAR_W) + 12,
+  )
   const y = linearScale([0, hi], [height - PAD.b, PAD.t])
-  const slot = (W - PAD.l - PAD.r) / Math.max(1, n)
+  const slot = (W - padL - PAD.r) / Math.max(1, n)
   const barW = slot * 0.62
-  const cx = (i: number) => PAD.l + slot * i + slot / 2
+  const cx = (i: number) => padL + slot * i + slot / 2
+  const refW = reference ? Math.ceil(reference.label.length * CHAR_W) + 16 : 0
+  const refY = reference
+    ? Math.max(2, Math.min(y(reference.value) - 24, height - PAD.b - 20))
+    : 0
   const every = Math.ceil(n / 8)
 
   return (
@@ -54,22 +64,22 @@ export function BarChart({
         role='img'
         aria-label={ariaLabel}
       >
-        {ticks.map((t) => (
+        {ticks.map((t, ti) => (
           <g key={t}>
             <line
               className={styles.gridLine}
-              x1={PAD.l}
+              x1={padL}
               x2={W - PAD.r}
               y1={y(t)}
               y2={y(t)}
             />
             <text
               className={styles.axisText}
-              x={PAD.l - 6}
+              x={padL - 6}
               y={y(t) + 4}
               textAnchor='end'
             >
-              {formatValue(t)}
+              {tickLabels[ti]}
             </text>
           </g>
         ))}
@@ -95,7 +105,7 @@ export function BarChart({
         {reference && (
           <g>
             <line
-              x1={PAD.l}
+              x1={padL}
               x2={W - PAD.r}
               y1={y(reference.value)}
               y2={y(reference.value)}
@@ -103,10 +113,19 @@ export function BarChart({
               strokeWidth={2}
               strokeDasharray='6 4'
             />
+            <rect
+              data-testid='ref-pill'
+              className={styles.refPill}
+              x={W - PAD.r - refW}
+              y={refY}
+              width={refW}
+              height={18}
+              rx={9}
+            />
             <text
               className={styles.refText}
-              x={W - PAD.r}
-              y={y(reference.value) - 6}
+              x={W - PAD.r - 8}
+              y={refY + 13}
               textAnchor='end'
             >
               {reference.label}

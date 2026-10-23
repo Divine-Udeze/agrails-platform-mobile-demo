@@ -30,6 +30,11 @@
   font-size: 12px;
 }
 
+.refPill {
+  fill: var(--surface);
+  stroke: var(--line);
+}
+
 .refText {
   fill: var(--ink-2);
   font-size: 12px;
@@ -97,7 +102,7 @@
 .gaugeValue {
   font-size: var(--fs-2xl);
   font-weight: 800;
-  margin-top: calc(-1 * var(--sp-5));
+  margin-top: var(--sp-3);
 }
 .gaugeEnds {
   display: flex;

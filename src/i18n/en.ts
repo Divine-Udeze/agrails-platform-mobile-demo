@@ -245,6 +245,30 @@ export const en = {
   'view.title': 'Farm boundary',
   'view.perimeter': 'Edge length {m} m',
   'view.corners': '{n} corners',
+  'yield.title': 'Past harvests',
+  'yield.intro': '{crop} harvests in {county} over the last {n} years',
+  'yield.chart': 'Harvest per hectare by year',
+  'yield.average': 'Average {avg} t',
+  'yield.badYear': 'Bad year',
+  'yield.goodYear': 'Normal year',
+  'yield.riskTitle': 'Risk for this farm',
+  'yield.summary':
+    'In {bad} of the last {total} seasons, harvests fell below 70% of normal.',
+  'yield.meaning.low': 'Bad seasons are rare here, so your cover costs less.',
+  'yield.meaning.medium':
+    'Bad seasons happen every few years. Cover protects your income when they do.',
+  'yield.meaning.high':
+    'Bad seasons are common here. Insurance protects you the most.',
+  'yield.cta': 'See insurance options',
+  'yield.report': 'See full report',
+  'yield.backToFarm': 'Back to farm',
+  'risk.gauge': 'Risk level: {level}',
+  'report.title': 'Harvest report',
+  'report.rainChart': 'Season rainfall by year',
+  'report.rainTitle': 'Rainfall each season (mm)',
+  'report.year': 'Year',
+  'report.rain': 'Rain (mm)',
+  'report.harvest': 'Harvest (t/ha)',
 }
 
 export type StringKey = keyof typeof en
