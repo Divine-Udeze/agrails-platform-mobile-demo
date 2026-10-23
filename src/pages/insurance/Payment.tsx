@@ -37,6 +37,7 @@ import {
 import { requestMpesaPayment } from '@/src/services/paymentService'
 import { createPolicy } from '@/src/services/policyService'
 import { formatDate, formatKES } from '@/src/utils/format'
+import { isActiveNow } from '@/src/utils/policy'
 import { normalizeKenyanPhone } from '@/src/utils/validation'
 
 type Phase = 'confirm' | 'waiting' | 'failed' | 'timeout' | 'issue' | 'blocked'
@@ -77,7 +78,7 @@ export default function Payment() {
   )
   // While waiting, the farm turning insured (our own success) is not "already
   // insured": the page stays on the waiting view until it navigates.
-  const insured = policy?.status === 'active' && phase !== 'waiting'
+  const insured = !!policy && isActiveNow(policy) && phase !== 'waiting'
   const { quotes, error, retry } = useQuotes(insured ? undefined : farm, [
     planId,
   ])
@@ -93,7 +94,7 @@ export default function Payment() {
   const activePolicy = useRef(false)
 
   useEffect(() => {
-    const active = policy?.status === 'active'
+    const active = !!policy && isActiveNow(policy)
     activePolicy.current = active
     // the policy is committed, so the active-policy guard takes over
     if (active) clearPaymentRecorded(farmId)
@@ -242,7 +243,7 @@ export default function Payment() {
           <PhonePay className={styles.pulse} />
           <h1 className='h1'>{t('pay.waitTitle')}</h1>
           <p style={{ margin: 0, fontSize: 'var(--fs-lg)' }}>
-            {t('pay.waitBody', { amount: amount.replace(' ', '\u00a0') })}
+            {t('pay.waitBody', { amount })}
           </p>
           <div>
             <Chip status='warning'>

@@ -9,7 +9,6 @@ import { useFarm, usePolicyForFarm } from '@/src/context/AppContext'
 import { t } from '@/src/i18n'
 import NotFound from '@/src/pages/NotFound'
 import styles from '@/src/pages/pages.module.css'
-import type { PolicyStatus } from '@/src/types'
 import {
   formatAcres,
   formatDate,
@@ -18,12 +17,7 @@ import {
 } from '@/src/utils/format'
 import { buildQuote } from '@/src/utils/insurance'
 import { healthStatus } from '@/src/utils/monitor'
-
-const POLICY_CHIP: Record<PolicyStatus, 'good' | 'neutral' | 'warning'> = {
-  active: 'good',
-  expired: 'neutral',
-  claimed: 'warning',
-}
+import { displayStatus, policyChipStatus } from '@/src/utils/policy'
 
 export default function FarmDetail() {
   const { farmId } = useParams()
@@ -32,7 +26,8 @@ export default function FarmDetail() {
   if (!farm) return <NotFound />
 
   const status = healthStatus(farm.healthScore)
-  const insuredNow = policy?.status === 'active'
+  const shown = policy ? displayStatus(policy) : undefined
+  const insuredNow = shown === 'active'
   const fromPremium = buildQuote(farm, 'basic').farmerPremiumKES
 
   return (
@@ -100,12 +95,12 @@ export default function FarmDetail() {
           </div>
         </section>
 
-        {policy && insuredNow ? (
+        {policy && shown && insuredNow ? (
           <section className='card stack-sm'>
             <div className='row-between'>
               <h2 className='h3'>{t('farm.policyTitle')}</h2>
-              <Chip status={POLICY_CHIP[policy.status]}>
-                {t(`policyStatus.${policy.status}`)}
+              <Chip status={policyChipStatus(shown)}>
+                {t(`policyStatus.${shown}`)}
               </Chip>
             </div>
             <div className='figure-sm'>{t(`plan.${policy.planId}`)}</div>
@@ -118,7 +113,9 @@ export default function FarmDetail() {
                 end: formatDate(policy.coverageEnd),
               })}
             </div>
-            <Link to={`/policy/${policy.id}`}>{t('farm.viewPolicy')}</Link>
+            <Link to={`/policy/${policy.id}`} className={styles.healthLink}>
+              {t('farm.viewPolicy')}
+            </Link>
           </section>
         ) : (
           <section

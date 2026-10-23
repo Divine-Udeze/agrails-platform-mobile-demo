@@ -53,6 +53,7 @@ export const en = {
   'error.notFound.body': 'It may have been removed, or the link is wrong.',
   'error.generic.title': 'Something went wrong',
   'error.generic.body': 'Please try again.',
+  'error.startAgain': 'Start again',
   'notFound.cta': 'Go to home',
   'welcome.tagline': 'Crop insurance for Kenyan farmers',
   'welcome.slide1.title': 'Protect your harvest',
@@ -100,6 +101,7 @@ export const en = {
   'reg.submit': 'Create my account',
   'reg.idExists': 'This ID already has a policy with us.',
   'reg.findPolicy': 'Find my policy',
+  'reg.differentNumber': 'Use a different number',
   'lookup.title': 'Find my policy',
   'lookup.body':
     'Use the policy number on your certificate or SMS, or your national ID number.',
@@ -139,7 +141,6 @@ export const en = {
   'farm.notInsured': 'Not insured',
   'farm.health': 'Health {score}',
   'farm.trend': 'Crop health trend for {name}',
-  'farm.shape': 'Shape of {name}',
   'farm.edit': 'Edit farm',
   'farm.areaLabel': 'Size',
   'farm.planted': 'Planted {date}',

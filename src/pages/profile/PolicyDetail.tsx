@@ -14,7 +14,7 @@ import {
   displayStatus,
   policyChipStatus,
 } from '@/src/pages/profile/policyStatus'
-import { formatKESNoWrap } from '@/src/utils/format'
+import { formatKES } from '@/src/utils/format'
 
 export default function PolicyDetail() {
   const { policyId } = useParams()
@@ -27,8 +27,8 @@ export default function PolicyDetail() {
   const rows: [string, string][] = [
     [t('conf.policyNo'), policy.policyNumber],
     [t('conf.plan'), t(`plan.${policy.planId}`)],
-    [t('conf.cover'), formatKESNoWrap(policy.sumInsuredKES)],
-    [t('conf.paid'), formatKESNoWrap(policy.farmerPremiumKES)],
+    [t('conf.cover'), formatKES(policy.sumInsuredKES)],
+    [t('conf.paid'), formatKES(policy.farmerPremiumKES)],
     [t('conf.receipt'), policy.mpesaReceipt],
   ]
 
@@ -67,7 +67,7 @@ export default function PolicyDetail() {
                 <span className='row'>
                   <Icon name='cash' />
                   <span className={cardStyles.nowrap}>
-                    {formatKESNoWrap(p.amountKES)}
+                    {formatKES(p.amountKES)}
                   </span>
                 </span>
                 <Icon name='chevron' />

@@ -1,11 +1,23 @@
 import { screen, within } from '@testing-library/react'
+import { vi } from 'vitest'
 import { initialState } from '@/src/context/reducer'
 import { STATE_KEY } from '@/src/context/persistence'
 import OtpVerification from '@/src/pages/onboarding/OtpVerification'
 import PhoneEntry from '@/src/pages/onboarding/PhoneEntry'
 import Registration from '@/src/pages/onboarding/Registration'
 import Welcome from '@/src/pages/onboarding/Welcome'
+import * as authService from '@/src/services/authService'
 import { renderWithApp } from '@/src/test/renderWithApp'
+
+// The real service, wrapped so tests can count calls.
+vi.mock('@/src/services/authService', async (importOriginal) => {
+  const actual = await importOriginal<typeof authService>()
+  return { ...actual, verifyOtp: vi.fn(actual.verifyOtp) }
+})
+
+afterEach(() => {
+  vi.mocked(authService.verifyOtp).mockClear()
+})
 
 test('Welcome shows the value story and starts sign-up', async () => {
   const { user } = renderWithApp(<Welcome />)
@@ -13,6 +25,42 @@ test('Welcome shows the value story and starts sign-up', async () => {
   expect(screen.getByText('We watch your farm from space')).toBeInTheDocument()
   await user.click(screen.getByRole('button', { name: 'Get started' }))
   expect(screen.getByTestId('location')).toHaveTextContent('/phone-entry')
+})
+
+test('Welcome jumps between slides when the phone asks for less motion', async () => {
+  const original = window.matchMedia
+  window.matchMedia = ((query: string) => ({
+    ...original(query),
+    matches: query === '(prefers-reduced-motion: reduce)',
+  })) as typeof window.matchMedia
+  const scrollTo = vi.fn()
+  const savedScrollTo = Element.prototype.scrollTo
+  Element.prototype.scrollTo = scrollTo
+  try {
+    const { user } = renderWithApp(<Welcome />)
+    await user.click(screen.getByRole('button', { name: 'Slide 2 of 3' }))
+    expect(scrollTo).toHaveBeenCalledWith(
+      expect.objectContaining({ behavior: 'auto' }),
+    )
+  } finally {
+    window.matchMedia = original
+    Element.prototype.scrollTo = savedScrollTo
+  }
+})
+
+test('Welcome glides between slides by default', async () => {
+  const scrollTo = vi.fn()
+  const savedScrollTo = Element.prototype.scrollTo
+  Element.prototype.scrollTo = scrollTo
+  try {
+    const { user } = renderWithApp(<Welcome />)
+    await user.click(screen.getByRole('button', { name: 'Slide 2 of 3' }))
+    expect(scrollTo).toHaveBeenCalledWith(
+      expect.objectContaining({ behavior: 'smooth' }),
+    )
+  } finally {
+    Element.prototype.scrollTo = savedScrollTo
+  }
 })
 
 test('Welcome sends existing policyholders to policy lookup', async () => {
@@ -83,6 +131,29 @@ test('OTP for a new number goes to registration', async () => {
   expect(await screen.findByTestId('location')).toHaveTextContent(
     '/registration',
   )
+})
+
+test('OTP checks a code once and logs in once under StrictMode', async () => {
+  const { user } = renderWithApp(<OtpVerification />, {
+    ...otpRoute('+254712345678'),
+    strict: true,
+  })
+  await user.click(screen.getByLabelText('Digit 1'))
+  await user.keyboard('123456')
+  expect(await screen.findByTestId('location')).toHaveTextContent('/home')
+  expect(authService.verifyOtp).toHaveBeenCalledTimes(1)
+})
+
+test('OTP lets the farmer retry the same wrong code', async () => {
+  const { user } = renderWithApp(<OtpVerification />, {
+    ...otpRoute('+254712345678'),
+    strict: true,
+  })
+  await user.click(screen.getByLabelText('Digit 1'))
+  await user.keyboard('000000')
+  expect(await screen.findByRole('alert')).toHaveTextContent('not right')
+  await user.keyboard('000000')
+  await vi.waitFor(() => expect(authService.verifyOtp).toHaveBeenCalledTimes(2))
 })
 
 test('OTP after a policy lookup shows the masked phone and loads that farmer', async () => {

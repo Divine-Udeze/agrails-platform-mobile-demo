@@ -24,7 +24,8 @@ const payAt = (id = 'farm-tea') => ({
 const storedPolicies = () =>
   JSON.parse(localStorage.getItem(STATE_KEY)!).policies as unknown[]
 
-const PAY = 'Pay KES 14,700'
+// money is formatted with a non-breaking space so it never wraps
+const PAY = 'Pay KES\u00a014,700'
 
 /** Logs every location; the leave button goes to a stand-in page. */
 function LocationLog({ log }: { log: string[] }) {
@@ -363,7 +364,7 @@ test('after a failed payment, the next attempt shows its own amount, not the fai
   await user.click(await screen.findByRole('button', { name: 'Try again' }))
   await user.click(screen.getByRole('button', { name: 'to premium' }))
   const premium = await screen.findByRole('button', {
-    name: /^Pay KES (?!14,700)/,
+    name: /^Pay KES\u00a0(?!14,700)/,
   })
   await user.click(premium)
   expect(screen.getByText('Check your phone')).toBeInTheDocument()
@@ -392,7 +393,7 @@ test('mounting attached to a payment that then fails: the next plan shows its ow
   await user.click(await screen.findByRole('button', { name: 'Try again' }))
   await user.click(screen.getByRole('button', { name: 'to premium' }))
   const premium = await screen.findByRole('button', {
-    name: /^Pay KES (?!14,700)/,
+    name: /^Pay KES\u00a0(?!14,700)/,
   })
   await user.click(premium)
   expect(screen.getByText('Check your phone')).toBeInTheDocument()

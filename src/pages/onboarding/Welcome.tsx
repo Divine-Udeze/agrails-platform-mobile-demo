@@ -28,6 +28,14 @@ const SLIDES = [
   },
 ]
 
+/** Jump instead of gliding when the phone asks for less motion. */
+function scrollBehavior(): ScrollBehavior {
+  const reduce =
+    typeof window.matchMedia === 'function' &&
+    window.matchMedia('(prefers-reduced-motion: reduce)').matches
+  return reduce ? 'auto' : 'smooth'
+}
+
 export default function Welcome() {
   const navigate = useNavigate()
   const track = useRef<HTMLDivElement>(null)
@@ -41,7 +49,7 @@ export default function Welcome() {
 
   const goTo = (i: number) => {
     const el = track.current
-    el?.scrollTo?.({ left: i * el.clientWidth, behavior: 'smooth' })
+    el?.scrollTo?.({ left: i * el.clientWidth, behavior: scrollBehavior() })
     setIndex(i)
   }
 

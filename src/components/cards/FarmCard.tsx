@@ -7,13 +7,9 @@ import { Chip } from '@/src/components/common/Chip'
 import { CROP_ICON, Icon } from '@/src/components/common/Icons'
 import { t } from '@/src/i18n'
 import { seriesFor } from '@/src/services/monitorService'
-import type { Farm, Policy } from '@/src/types'
+import type { Farm } from '@/src/types'
 import { formatHa } from '@/src/utils/format'
 import { healthStatus } from '@/src/utils/monitor'
-
-export function isInsured(policies: Policy[], farmId: string): boolean {
-  return policies.some((p) => p.farmId === farmId && p.status === 'active')
-}
 
 export function FarmCard({ farm, insured }: { farm: Farm; insured: boolean }) {
   const status = healthStatus(farm.healthScore)

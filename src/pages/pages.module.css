@@ -86,9 +86,6 @@
   color: var(--soil-700);
   font-weight: 600;
 }
-.greeting {
-  padding: calc(var(--sp-4) + env(safe-area-inset-top)) var(--sp-4) 0;
-}
 .weather {
   display: flex;
   align-items: center;

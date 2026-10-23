@@ -8,9 +8,8 @@ import { t, type StringKey } from '@/src/i18n'
 import NotFound from '@/src/pages/NotFound'
 import styles from '@/src/pages/insurance/insurance.module.css'
 import { clearPaymentRecorded } from '@/src/services/paymentRegistry'
-import { formatDate, formatKES } from '@/src/utils/format'
-
-const nb = (s: string) => s.replace(/ /g, '\u00a0')
+import { formatDate, formatKES, noWrap } from '@/src/utils/format'
+import { isActiveNow, isInsured } from '@/src/utils/policy'
 
 export default function Confirmation() {
   const { farmId } = useParams()
@@ -21,16 +20,14 @@ export default function Confirmation() {
   const policy =
     policies.find(
       (p) => p.id === search.get('policy') && p.farmId === farmId,
-    ) ?? policies.find((p) => p.farmId === farmId && p.status === 'active')
-  const hasActive = policies.some(
-    (p) => p.farmId === farmId && p.status === 'active',
-  )
+    ) ?? policies.find((p) => p.farmId === farmId && isActiveNow(p))
+  const hasActive = isInsured(policies, farmId ?? '')
   // the policy is committed, so the registry's just-paid marker can go
   useEffect(() => {
     if (farmId && hasActive) clearPaymentRecorded(farmId)
   }, [farmId, hasActive])
   if (!farm || !policy) return <NotFound />
-  const active = policy.status === 'active'
+  const active = isActiveNow(policy)
 
   const rows: [string, string][] = [
     [t('conf.policyNo'), policy.policyNumber],
@@ -39,7 +36,7 @@ export default function Confirmation() {
     [
       t('conf.period'),
       // each date stays whole; the line may only break after the dash
-      `${nb(formatDate(policy.coverageStart))}\u00a0– ${nb(formatDate(policy.coverageEnd))}`,
+      `${noWrap(formatDate(policy.coverageStart))}\u00a0– ${noWrap(formatDate(policy.coverageEnd))}`,
     ],
     [t('conf.cover'), formatKES(policy.sumInsuredKES)],
     [t('conf.paid'), formatKES(policy.farmerPremiumKES)],

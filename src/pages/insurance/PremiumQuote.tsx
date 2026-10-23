@@ -15,12 +15,8 @@ import { t, type StringKey } from '@/src/i18n'
 import NotFound from '@/src/pages/NotFound'
 import styles from '@/src/pages/insurance/insurance.module.css'
 import { planFromSearch, useQuotes } from '@/src/pages/insurance/useQuote'
-import {
-  formatDate,
-  formatKES,
-  formatKESNoWrap,
-  formatNumber,
-} from '@/src/utils/format'
+import { formatDate, formatKES, formatNumber, noWrap } from '@/src/utils/format'
+import { isActiveNow } from '@/src/utils/policy'
 
 export default function PremiumQuote() {
   const { farmId } = useParams()
@@ -28,7 +24,7 @@ export default function PremiumQuote() {
   const navigate = useNavigate()
   const farm = useFarm(farmId)
   const policy = usePolicyForFarm(farmId)
-  const insured = policy?.status === 'active'
+  const insured = !!policy && isActiveNow(policy)
   const planId = planFromSearch(search)
   const { quotes, error, retry } = useQuotes(insured ? undefined : farm, [
     planId,
@@ -83,7 +79,7 @@ export default function PremiumQuote() {
             </div>
             <div className={`figure ${styles.heroFigure}`}>
               {t('quote.youPayBig', {
-                amount: formatKESNoWrap(quote.farmerPremiumKES),
+                amount: formatKES(quote.farmerPremiumKES),
               })}
             </div>
             <div>{t('quote.subsidyNote')}</div>
@@ -119,8 +115,8 @@ export default function PremiumQuote() {
             <div className='row-between'>
               <span className='muted'>{t('quote.period')}</span>
               <strong>
-                {formatDate(quote.coverageStart)} –{' '}
-                {formatDate(quote.coverageEnd)}
+                {/* each date stays whole; the line may only break after the dash */}
+                {`${noWrap(formatDate(quote.coverageStart))}\u00a0– ${noWrap(formatDate(quote.coverageEnd))}`}
               </strong>
             </div>
           </section>

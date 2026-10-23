@@ -29,7 +29,12 @@ export function Header({ title, back, right, transparent }: Props) {
           <Icon name='back' />
         </button>
       )}
-      <h1 className={styles.headerTitle}>{title}</h1>
+      {title ? (
+        <h1 className={styles.headerTitle}>{title}</h1>
+      ) : (
+        // no empty heading for screen readers; still pushes `right` to the end
+        <span className={styles.headerSpacer} />
+      )}
       {right}
     </header>
   )

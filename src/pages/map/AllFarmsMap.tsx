@@ -1,7 +1,6 @@
 import type { Map as LeafletMap } from 'leaflet'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { isInsured } from '@/src/components/cards/FarmCard'
 import { BottomSheet } from '@/src/components/common/BottomSheet'
 import { Button } from '@/src/components/common/Button'
 import { Chip } from '@/src/components/common/Chip'
@@ -16,6 +15,7 @@ import { t } from '@/src/i18n'
 import type { Status } from '@/src/types'
 import { formatHa } from '@/src/utils/format'
 import { healthStatus } from '@/src/utils/monitor'
+import { isInsured } from '@/src/utils/policy'
 
 /** Below this zoom farms are too small to see, so they are drawn as pins. */
 const PIN_ZOOM = 14

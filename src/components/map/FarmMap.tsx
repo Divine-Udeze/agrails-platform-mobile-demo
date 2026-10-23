@@ -1,6 +1,7 @@
 import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
 import { useEffect, useRef, useState } from 'react'
+import { GOLD, TOKEN_HEX } from '@/src/components/common/statusColor'
 import styles from '@/src/components/map/map.module.css'
 import { KENYA_CENTER } from '@/src/data/cropConfig'
 import type { LatLng } from '@/src/types'
@@ -8,8 +9,7 @@ import { centroid } from '@/src/utils/geo'
 
 const TILE_URL =
   'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'
-const GOLD = '#e0a526'
-const RAIN = '#4a9be0'
+const RAIN = TOKEN_HEX['var(--rain-400)']
 
 export interface MapPolygon {
   id: string

@@ -8,7 +8,8 @@ import { useFarms, usePayouts, usePolicies } from '@/src/context/AppContext'
 import { t } from '@/src/i18n'
 import NotFound from '@/src/pages/NotFound'
 import styles from '@/src/pages/payout/payout.module.css'
-import { money, stageSteps, useMarkPayoutRead } from '@/src/pages/payout/stages'
+import { stageSteps, useMarkPayoutRead } from '@/src/pages/payout/stages'
+import { formatKES } from '@/src/utils/format'
 
 export default function PayoutDetails() {
   const { payoutId } = useParams()
@@ -31,7 +32,7 @@ export default function PayoutDetails() {
       <div className='stack'>
         <section className={styles.total}>
           <div>{farm.name}</div>
-          <div className='figure'>{money(payout.amountKES)}</div>
+          <div className='figure'>{formatKES(payout.amountKES)}</div>
         </section>
 
         <section className='card stack-sm'>
@@ -70,7 +71,7 @@ export default function PayoutDetails() {
         <section className={`card ${styles.breakdown}`}>
           <div>
             <span>{t('payout.cover')}</span>
-            <span>{money(policy.sumInsuredKES)}</span>
+            <span>{formatKES(policy.sumInsuredKES)}</span>
           </div>
           <div>
             <span>{t('payout.gap')}</span>
@@ -78,7 +79,7 @@ export default function PayoutDetails() {
           </div>
           <div>
             <span>{t('payout.amount')}</span>
-            <span>{money(payout.amountKES)}</span>
+            <span>{formatKES(payout.amountKES)}</span>
           </div>
         </section>
 

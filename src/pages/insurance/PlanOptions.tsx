@@ -17,6 +17,7 @@ import styles from '@/src/pages/insurance/insurance.module.css'
 import { planFromSearch, useQuotes } from '@/src/pages/insurance/useQuote'
 import type { PlanId } from '@/src/types'
 import { formatDate, formatKES } from '@/src/utils/format'
+import { isActiveNow } from '@/src/utils/policy'
 
 export function TriggerBar({ triggerPct }: { triggerPct: number }) {
   const x = 8 + (184 * triggerPct) / 100
@@ -61,7 +62,7 @@ export default function PlanOptions() {
   const [search] = useSearchParams()
   const farm = useFarm(farmId)
   const policy = usePolicyForFarm(farmId)
-  const insured = policy?.status === 'active'
+  const insured = !!policy && isActiveNow(policy)
   const { quotes, error, retry } = useQuotes(
     insured ? undefined : farm,
     PLAN_LIST,

@@ -114,7 +114,7 @@ test('premium quote shows the split, the example payout and the pay button', asy
   ).toBeInTheDocument()
   expect(screen.getByText(/you receive about KES 120,000/)).toBeInTheDocument()
   await user.click(
-    screen.getByRole('button', { name: 'Pay KES 14,700 with M-Pesa' }),
+    screen.getByRole('button', { name: 'Pay KES\u00a014,700 with M-Pesa' }),
   )
   expect(screen.getByTestId('location')).toHaveTextContent(
     '/payment/farm-tea?plan=standard',
@@ -148,8 +148,9 @@ test('plan cards show the real price and cover for each plan', async () => {
   const plans: PlanId[] = ['basic', 'standard', 'premium']
   plans.forEach((plan, i) => {
     const q = buildQuote(tea, plan)
-    expect(radios[i]).toHaveTextContent(formatKES(q.farmerPremiumKES))
-    expect(radios[i]).toHaveTextContent(
+    // textContent keeps the non-breaking space that formatKES emits
+    expect(radios[i].textContent).toContain(formatKES(q.farmerPremiumKES))
+    expect(radios[i].textContent).toContain(
       `Cover up to ${formatKES(q.sumInsuredKES)}`,
     )
   })
@@ -201,14 +202,16 @@ test('premium quote shows subsidy, cover and per-bar amounts', async () => {
   const svg = screen.getByRole('img', {
     name: 'What you pay compared with what you could get',
   })
-  expect(svg.querySelector('[data-value]')).toHaveTextContent(
+  expect(svg.querySelector('[data-value]')?.textContent).toContain(
     formatKES(q.farmerPremiumKES),
   )
-  expect(screen.getByText(formatKES(q.sumInsuredKES))).toBeInTheDocument()
+  expect(
+    screen.getByText(formatKES(q.sumInsuredKES), { normalizer: (t) => t }),
+  ).toBeInTheDocument()
   // legend: government pays half of 29,400
-  expect(screen.getByText('Government pays').closest('li')).toHaveTextContent(
-    formatKES(q.subsidyKES),
-  )
+  expect(
+    screen.getByText('Government pays').closest('li')?.textContent,
+  ).toContain(formatKES(q.subsidyKES))
   expect(q.subsidyKES).toBe(14_700)
 })
 

@@ -35,6 +35,14 @@ test('Header back button navigates to the given path', async () => {
   expect(screen.getByTestId('location')).toHaveTextContent('/home')
 })
 
+test('Header renders a heading only when it has a title', () => {
+  const { unmount } = renderWithApp(<Header back='/home' />)
+  expect(screen.queryByRole('heading')).not.toBeInTheDocument()
+  unmount()
+  renderWithApp(<Header title='Farm' back='/home' />)
+  expect(screen.getByRole('heading', { level: 1, name: 'Farm' })).toBeVisible()
+})
+
 test('BottomNav shows five tabs and an unread payout dot', () => {
   renderWithApp(<BottomNav />, { state: seededState() })
   for (const name of ['Home', 'Monitor', 'Map', 'Payouts', 'Profile']) {

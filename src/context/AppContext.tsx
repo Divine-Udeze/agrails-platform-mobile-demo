@@ -12,6 +12,7 @@ import { loadState, saveState } from '@/src/context/persistence'
 import { resetPaymentSession } from '@/src/services/paymentRegistry'
 import { appReducer, type Action } from '@/src/context/reducer'
 import type { AppState, Farm, FarmFormData } from '@/src/types'
+import { isActiveNow } from '@/src/utils/policy'
 
 interface AppContextValue {
   state: AppState
@@ -62,7 +63,10 @@ export function useFarm(id?: string): Farm | undefined {
 export function usePolicyForFarm(farmId?: string) {
   const policies = usePolicies().filter((p) => p.farmId === farmId)
   return (
-    policies.find((p) => p.status === 'active') ?? policies[policies.length - 1]
+    policies.find((p) => isActiveNow(p)) ??
+    [...policies].sort((a, b) =>
+      b.coverageStart.localeCompare(a.coverageStart),
+    )[0]
   )
 }
 

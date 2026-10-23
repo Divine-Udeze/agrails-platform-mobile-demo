@@ -6,8 +6,8 @@ import { Screen } from '@/src/components/common/Screen'
 import { useFarms, usePayouts } from '@/src/context/AppContext'
 import { t } from '@/src/i18n'
 import styles from '@/src/pages/payout/payout.module.css'
-import { latestDate, money } from '@/src/pages/payout/stages'
-import { formatDate } from '@/src/utils/format'
+import { latestDate } from '@/src/pages/payout/stages'
+import { formatDate, formatKES } from '@/src/utils/format'
 
 export default function PayoutHistory() {
   const payouts = [...usePayouts()].sort((a, b) =>
@@ -29,7 +29,7 @@ export default function PayoutHistory() {
           <>
             <section className={styles.total}>
               <div>{t('payout.total')}</div>
-              <div className='figure'>{money(total)}</div>
+              <div className='figure'>{formatKES(total)}</div>
             </section>
             {payouts.map((p) => {
               const farm = farms.find((f) => f.id === p.farmId)
@@ -57,7 +57,7 @@ export default function PayoutHistory() {
                     </span>
                     <span className={styles.itemSide}>
                       <strong className={styles.nowrap}>
-                        {money(p.amountKES)}
+                        {formatKES(p.amountKES)}
                       </strong>
                     </span>
                   </span>

@@ -13,7 +13,7 @@ import {
   policyChipStatus,
   sortPolicies,
 } from '@/src/pages/profile/policyStatus'
-import { formatKESNoWrap } from '@/src/utils/format'
+import { formatKES } from '@/src/utils/format'
 
 export default function Policies() {
   const navigate = useNavigate()
@@ -61,7 +61,7 @@ export default function Policies() {
                   <span className={styles.nowrap}>{t(`plan.${p.planId}`)}</span>
                   <span className={styles.nowrap}>
                     {t('farm.cover', {
-                      amount: formatKESNoWrap(p.sumInsuredKES),
+                      amount: formatKES(p.sumInsuredKES),
                     })}
                   </span>
                 </span>

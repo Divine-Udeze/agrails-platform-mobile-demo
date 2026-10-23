@@ -3,6 +3,7 @@ import { CHAR_W } from '@/src/components/charts/geometry'
 import { ChartTooltip } from '@/src/components/charts/ChartTooltip'
 import styles from '@/src/components/charts/charts.module.css'
 import { linearScale, niceTicks } from '@/src/components/charts/scale'
+import { TOKEN_HEX } from '@/src/components/common/statusColor'
 
 export interface Bar {
   label: string
@@ -23,22 +24,6 @@ interface Props {
 
 const W = 320
 
-/** Bar colour tokens resolved to hex for the contrast check; kept in step with tokens.css by a test. */
-export const HEX: Record<string, string> = {
-  'var(--green-700)': '#1f6b3a',
-  'var(--green-500)': '#2f9e5a',
-  'var(--green-300)': '#8fd3a5',
-  'var(--green-100)': '#e3f5e8',
-  'var(--soil-700)': '#6b4423',
-  'var(--soil-500)': '#96643a',
-  'var(--gold-500)': '#e0a526',
-  'var(--rain-600)': '#1f6fb5',
-  'var(--rain-400)': '#4a9be0',
-  'var(--rain-100)': '#e2effb',
-  'var(--good)': '#2f9e5a',
-  'var(--warning)': '#c77700',
-  'var(--danger)': '#c62828',
-}
 const luminance = (hex: string) => {
   const c = [1, 3, 5].map((i) => {
     const v = parseInt(hex.slice(i, i + 2), 16) / 255
@@ -49,7 +34,7 @@ const luminance = (hex: string) => {
 const INK_L = luminance('#17201a')
 /** true when white text reads better than ink on this bar colour (unknown colours get white) */
 export function whiteOnBar(color = 'var(--green-500)'): boolean {
-  const hex = HEX[color] ?? (/^#[0-9a-f]{6}$/i.test(color) ? color : null)
+  const hex = TOKEN_HEX[color] ?? (/^#[0-9a-f]{6}$/i.test(color) ? color : null)
   if (!hex) return true
   const l = luminance(hex)
   return 1.05 / (l + 0.05) >= (l + 0.05) / (INK_L + 0.05)

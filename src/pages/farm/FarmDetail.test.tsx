@@ -18,6 +18,14 @@ test('shows an insured farm with its policy', () => {
   expect(screen.getByText('Active')).toBeInTheDocument()
 })
 
+test('View policy is a full-size tap target', () => {
+  renderWithApp(<FarmDetail />, at('farm-maize'))
+  const link = screen.getByRole('link', { name: 'View policy' })
+  expect(link).toHaveAttribute('href', '/policy/policy-maize')
+  // healthLink gives the link a 48px minimum height
+  expect(link.className).toMatch(/healthLink/)
+})
+
 test('hero tile is named after the crop and farm', () => {
   renderWithApp(<FarmDetail />, at('farm-maize'))
   expect(

@@ -103,6 +103,21 @@ test('after logging out the guards keep the farmer out of /home', async () => {
   expect(screen.queryByText('Wanjiru Kamau')).not.toBeInTheDocument()
 })
 
+test('a new user can leave registration to use a different number', async () => {
+  const user = userEvent.setup()
+  renderAt('/registration', newUser)
+  await user.click(
+    await screen.findByRole('button', { name: 'Use a different number' }),
+  )
+  expect(
+    await screen.findByRole('heading', { name: 'What is your phone number?' }),
+  ).toBeInTheDocument()
+  expect(screen.getByTestId('where')).toHaveTextContent(/^\/phone-entry$/)
+  expect(
+    JSON.parse(localStorage.getItem('agrails_auth') ?? '{}'),
+  ).toMatchObject({ isAuthenticated: false })
+})
+
 test('the profile, policies and policy routes render real pages', async () => {
   renderAt('/policy/policy-maize', seededState())
   expect(await screen.findByText('AGR-2026-004417')).toBeInTheDocument()

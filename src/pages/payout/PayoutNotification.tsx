@@ -5,8 +5,8 @@ import { useFarmer, useFarms, usePayouts } from '@/src/context/AppContext'
 import { t } from '@/src/i18n'
 import NotFound from '@/src/pages/NotFound'
 import styles from '@/src/pages/payout/payout.module.css'
-import { money, useMarkPayoutRead } from '@/src/pages/payout/stages'
-import { formatPhone } from '@/src/utils/format'
+import { useMarkPayoutRead } from '@/src/pages/payout/stages'
+import { formatKES, formatPhone } from '@/src/utils/format'
 
 export default function PayoutNotification() {
   const { payoutId } = useParams()
@@ -29,7 +29,7 @@ export default function PayoutNotification() {
           {t('payout.headline', { crop: t(`crop.${farm.crop}`) })}
         </p>
         <div className={`${styles.amount} ${styles.pop}`}>
-          {money(payout.amountKES)}
+          {formatKES(payout.amountKES)}
         </div>
         <p className={styles.line}>
           {t('payout.reason', {

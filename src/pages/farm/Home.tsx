@@ -1,6 +1,6 @@
 import { useMemo } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { FarmCard, isInsured } from '@/src/components/cards/FarmCard'
+import { FarmCard } from '@/src/components/cards/FarmCard'
 import { Ring } from '@/src/components/charts/Ring'
 import { Button } from '@/src/components/common/Button'
 import { EmptyState } from '@/src/components/common/ErrorStates'
@@ -16,7 +16,9 @@ import { t } from '@/src/i18n'
 import styles from '@/src/pages/pages.module.css'
 import { getWeather, seriesFor } from '@/src/services/monitorService'
 import { formatDate, formatHa, formatKES } from '@/src/utils/format'
+import { nairobiMidnight } from '@/src/utils/insurance'
 import { healthStatus, rainfallDeficitPct } from '@/src/utils/monitor'
+import { isActiveNow, isInsured } from '@/src/utils/policy'
 
 const WEATHER_ICON: Record<'sunny' | 'cloudy' | 'rain', IconName> = {
   sunny: 'sun',
@@ -42,7 +44,7 @@ export default function Home() {
   const insuredFarms = farms.filter((f) => isInsured(policies, f.id))
   const insuredHa = insuredFarms.reduce((s, f) => s + f.areaHa, 0)
   const cover = policies
-    .filter((p) => p.status === 'active')
+    .filter((p) => isActiveNow(p))
     .reduce((s, p) => s + p.sumInsuredKES, 0)
   // Prefer farms that have never been insured (the clearest upsell), then lapsed ones.
   const uninsured =
@@ -61,7 +63,8 @@ export default function Home() {
             {t('home.greeting', { name: farmer.name.split(' ')[0] })}
           </h1>
           <p className='muted' style={{ margin: '4px 0 0' }}>
-            {formatDate(new Date().toISOString())} · {farmer.county}
+            {formatDate(new Date(nairobiMidnight()).toISOString())} ·{' '}
+            {farmer.county}
           </p>
         </div>
 

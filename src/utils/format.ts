@@ -15,13 +15,14 @@ const MONTHS = [
   'Dec',
 ]
 
+/** KES amount; a non-breaking space keeps "KES" and the number on one line. */
 export function formatKES(amount: number): string {
-  return `KES ${Math.round(amount).toLocaleString('en-US')}`
+  return `KES\u00a0${Math.round(amount).toLocaleString('en-US')}`
 }
 
-/** KES amount that never wraps between "KES" and the number. */
-export function formatKESNoWrap(amount: number): string {
-  return formatKES(amount).replace(' ', '\u00a0')
+/** Keeps text on one line: every space becomes a non-breaking space. */
+export function noWrap(s: string): string {
+  return s.replace(/ /g, '\u00a0')
 }
 
 export function haToAcres(ha: number): number {

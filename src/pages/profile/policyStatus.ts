@@ -1,34 +1,12 @@
-import type { PolicyStatus, Status } from '@/src/types'
-import { nairobiMidnight } from '@/src/utils/insurance'
+import type { PolicyStatus } from '@/src/types'
+import { displayStatus } from '@/src/utils/policy'
+
+export { displayStatus, policyChipStatus } from '@/src/utils/policy'
 
 interface PolicyDates {
   status: PolicyStatus
   coverageStart: string
   coverageEnd: string
-}
-
-/**
- * The status to show: a stored 'active' policy whose cover ended before today
- * (Nairobi date) is shown as expired. Stored data is never changed.
- */
-export function displayStatus(
-  policy: Pick<PolicyDates, 'status' | 'coverageEnd'>,
-  today: Date = new Date(),
-): PolicyStatus {
-  if (
-    policy.status === 'active' &&
-    nairobiMidnight(today) > Date.parse(policy.coverageEnd)
-  ) {
-    return 'expired'
-  }
-  return policy.status
-}
-
-/** Chip colour for a status: active is good, paid out is a warning, expired is neutral. */
-export function policyChipStatus(status: PolicyStatus): Status | 'neutral' {
-  if (status === 'active') return 'good'
-  if (status === 'claimed') return 'warning'
-  return 'neutral'
 }
 
 /** Active (by display status) first, then the newest start date first. */

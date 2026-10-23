@@ -1,4 +1,5 @@
 import styles from '@/src/components/common/common.module.css'
+import { GOLD } from '@/src/components/common/statusColor'
 import type { Crop, Status } from '@/src/types'
 
 interface Props {
@@ -11,7 +12,6 @@ interface Props {
 
 const G = '#2f9e5a'
 const GD = '#1f6b3a'
-const GOLD = '#e0a526'
 const SOIL = '#96643a'
 const CREAM = '#f4e3b5'
 

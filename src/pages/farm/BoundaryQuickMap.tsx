@@ -1,6 +1,7 @@
 import { useMemo, useRef, useState } from 'react'
 import { Navigate, useNavigate } from 'react-router-dom'
 import { Button } from '@/src/components/common/Button'
+import { GOLD } from '@/src/components/common/statusColor'
 import { FarmMap } from '@/src/components/map/FarmMap'
 import { MapScreen } from '@/src/components/map/MapScreen'
 import { useMapStatus } from '@/src/components/map/useMapStatus'
@@ -13,7 +14,6 @@ import type { LatLng } from '@/src/types'
 import { acresToHa, formatAcres, formatHa } from '@/src/utils/format'
 import { squareAround } from '@/src/utils/geo'
 
-const SQUARE_COLOR = '#e0a526'
 const SIZES = [0.5, 1, 2, 5]
 
 export default function BoundaryQuickMap() {
@@ -30,7 +30,7 @@ export default function BoundaryQuickMap() {
   const polygons = useMemo(
     () =>
       boundary.length
-        ? [{ id: 'quick-square', boundary, color: SQUARE_COLOR }]
+        ? [{ id: 'quick-square', boundary, color: GOLD }]
         : undefined,
     [boundary],
   )

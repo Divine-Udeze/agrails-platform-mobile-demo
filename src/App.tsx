@@ -1,5 +1,6 @@
 import { lazy, Suspense, useEffect } from 'react'
 import { BrowserRouter, Route, Routes, useLocation } from 'react-router-dom'
+import { ErrorBoundary } from '@/src/components/common/ErrorBoundary'
 import { LoadingState } from '@/src/components/common/ErrorStates'
 import { AppProvider } from '@/src/context/AppContext'
 import NotFound from '@/src/pages/NotFound'
@@ -126,7 +127,9 @@ export default function App() {
       <BrowserRouter
         future={{ v7_startTransition: true, v7_relativeSplatPath: true }}
       >
-        <AppRoutes />
+        <ErrorBoundary>
+          <AppRoutes />
+        </ErrorBoundary>
       </BrowserRouter>
     </AppProvider>
   )

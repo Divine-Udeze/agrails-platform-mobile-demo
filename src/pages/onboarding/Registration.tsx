@@ -1,4 +1,4 @@
-import { useState, type FormEvent } from 'react'
+import { startTransition, useState, type FormEvent } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { BottomSheet } from '@/src/components/common/BottomSheet'
 import { Button } from '@/src/components/common/Button'
@@ -69,12 +69,32 @@ export default function Registration() {
     }
   }
 
+  // The only way out: public pages send a signed-in new user back here. The
+  // logout joins the navigation's transition so both land in one render; on
+  // its own it would render first and the guard would send the farmer to /.
+  const changeNumber = () => {
+    navigate('/phone-entry', { replace: true })
+    startTransition(() => {
+      dispatch({ type: 'LOGOUT' })
+    })
+  }
+
   return (
     <Screen
       footer={
-        <Button block loading={saving} onClick={() => submit()}>
-          {t('reg.submit')}
-        </Button>
+        <>
+          <Button block loading={saving} onClick={() => submit()}>
+            {t('reg.submit')}
+          </Button>
+          <Button
+            block
+            variant='ghost'
+            disabled={saving}
+            onClick={changeNumber}
+          >
+            {t('reg.differentNumber')}
+          </Button>
+        </>
       }
     >
       <form className='stack-lg' onSubmit={submit} noValidate>

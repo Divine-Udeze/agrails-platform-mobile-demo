@@ -2,6 +2,7 @@ import { startTransition, useEffect, useMemo, useRef, useState } from 'react'
 import { Navigate, useNavigate } from 'react-router-dom'
 import { Button } from '@/src/components/common/Button'
 import { CROP_ICON, Icon } from '@/src/components/common/Icons'
+import { GOLD } from '@/src/components/common/statusColor'
 import formStyles from '@/src/components/forms/forms.module.css'
 import { FarmMap } from '@/src/components/map/FarmMap'
 import { MapScreen } from '@/src/components/map/MapScreen'
@@ -36,7 +37,7 @@ export default function ConfirmFarm() {
   }, [])
 
   const polygons = useMemo(
-    () => [{ id: 'new', boundary: form.boundary, color: '#e0a526' }],
+    () => [{ id: 'new', boundary: form.boundary, color: GOLD }],
     [form.boundary],
   )
 

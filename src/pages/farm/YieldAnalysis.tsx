@@ -15,6 +15,7 @@ import NotFound from '@/src/pages/NotFound'
 import styles from '@/src/pages/pages.module.css'
 import { analyzeFarmYield } from '@/src/services/farmService'
 import type { Farm, RiskLevel, YieldAnalysisResult } from '@/src/types'
+import { isActiveNow } from '@/src/utils/policy'
 
 const RISK_VALUE: Record<RiskLevel, number> = {
   low: 0.5,
@@ -58,7 +59,7 @@ export default function YieldAnalysis() {
   const { result, error, retry } = useYieldAnalysis(farm)
   if (!farm) return <NotFound />
 
-  const insured = policy?.status === 'active'
+  const insured = !!policy && isActiveNow(policy)
   const footer = result && (
     <>
       {insured ? (

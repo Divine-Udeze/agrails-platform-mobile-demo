@@ -24,6 +24,9 @@
   overflow: hidden;
   text-overflow: ellipsis;
 }
+.headerSpacer {
+  flex: 1;
+}
 .iconBtn {
   width: var(--tap);
   height: var(--tap);

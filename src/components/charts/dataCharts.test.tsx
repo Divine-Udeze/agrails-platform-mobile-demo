@@ -1,7 +1,8 @@
 import { readFileSync } from 'node:fs'
 import { fireEvent, render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { BarChart, HEX, whiteOnBar } from '@/src/components/charts/BarChart'
+import { BarChart, whiteOnBar } from '@/src/components/charts/BarChart'
+import { TOKEN_HEX } from '@/src/components/common/statusColor'
 import { CHAR_W } from '@/src/components/charts/geometry'
 import { Donut } from '@/src/components/charts/Donut'
 import { LineChart } from '@/src/components/charts/LineChart'
@@ -595,7 +596,7 @@ describe('BarChart inside-label contrast', () => {
       '#2f9e5a',
       '#c77700',
       '#c62828',
-      ...Object.values(HEX),
+      ...Object.values(TOKEN_HEX),
     ]) {
       const text = whiteOnBar(bar) ? '#ffffff' : '#17201a'
       const [a, b] = [lum(bar), lum(text)].sort((x, y) => y - x)
@@ -603,9 +604,9 @@ describe('BarChart inside-label contrast', () => {
     }
   })
 
-  test('HEX matches tokens.css', () => {
+  test('TOKEN_HEX matches tokens.css', () => {
     const css = readFileSync('src/styles/tokens.css', 'utf8')
-    for (const [ref, hex] of Object.entries(HEX)) {
+    for (const [ref, hex] of Object.entries(TOKEN_HEX)) {
       const name = ref.slice(4, -1)
       expect(css).toMatch(new RegExp(`${name}:\\s*${hex};`, 'i'))
     }
