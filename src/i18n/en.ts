@@ -302,6 +302,36 @@ export const en = {
   'quote.how3':
     'If it is below {pct}%, money is sent to your M-Pesa. No claim forms.',
   'quote.pay': 'Pay {amount} with M-Pesa',
+  'pay.title': 'Pay with M-Pesa',
+  'pay.number': 'M-Pesa number',
+  'pay.for': '{plan} cover for {farm}',
+  'pay.cta': 'Pay {amount}',
+  'pay.demoHint':
+    'Demo: numbers ending in 0 fail, numbers ending in 9 time out.',
+  'pay.waitTitle': 'Check your phone',
+  'pay.waitBody': 'Enter your M-Pesa PIN to pay {amount} to Agrails.',
+  'pay.countdown': 'Waiting {s}s',
+  'pay.timeoutTitle': 'We did not hear back from M-Pesa',
+  'pay.timeoutBody':
+    'No money was taken. Make sure your phone is on and try again.',
+  'pay.issueTitle': 'Your payment went through, but we hit a problem',
+  'pay.issueBody':
+    'Do not pay again. We could not create your policy yet. Please contact Agrails support with your M-Pesa message.',
+  'pay.stillWaiting': 'Still waiting for M-Pesa…',
+  'pay.hide': 'Close',
+  'confirm.certTitle': 'Policy certificate',
+  'conf.title': 'You are covered!',
+  'conf.body': '{farm} is now protected for the season.',
+  'conf.certificate': 'Policy certificate',
+  'conf.policyNo': 'Policy number',
+  'conf.farm': 'Farm',
+  'conf.plan': 'Plan',
+  'conf.period': 'Cover period',
+  'conf.cover': 'Cover',
+  'conf.paid': 'You paid',
+  'conf.receipt': 'M-Pesa receipt',
+  'conf.goFarm': 'Go to my farm',
+  'conf.allPolicies': 'See all my policies',
 }
 
 export type StringKey = keyof typeof en

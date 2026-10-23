@@ -9,6 +9,7 @@ import {
   type ReactNode,
 } from 'react'
 import { loadState, saveState } from '@/src/context/persistence'
+import { resetPaymentSession } from '@/src/services/paymentRegistry'
 import { appReducer, type Action } from '@/src/context/reducer'
 import type { AppState, Farm, FarmFormData } from '@/src/types'
 
@@ -32,6 +33,11 @@ export function AppProvider({
     (s) => s ?? loadState(),
   )
   useEffect(() => saveState(state), [state])
+  // A different user (login, logout) must never inherit a payment in flight.
+  const { phone, isAuthenticated } = state.auth
+  useEffect(() => {
+    resetPaymentSession()
+  }, [phone, isAuthenticated])
   const value = useMemo(() => ({ state, dispatch }), [state])
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>
 }
