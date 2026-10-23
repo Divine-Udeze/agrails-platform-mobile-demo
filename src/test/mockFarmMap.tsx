@@ -11,6 +11,8 @@ export const TEST_SQUARE: LatLng[] = squareAround([-0.3031, 36.08], 1)
 export const fakeMap = {
   dragging: { enable: vi.fn(), disable: vi.fn() },
   setView: vi.fn(),
+  fitBounds: vi.fn(),
+  flyTo: vi.fn(),
   // 1 px is about 1.1 m: a 100 px square is just over 1 ha.
   containerPointToLatLng: ([x, y]: [number, number]) => ({
     lat: -0.3031 - y * 0.00001,

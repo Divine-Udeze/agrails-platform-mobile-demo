@@ -179,6 +179,12 @@ export const en = {
   'boundary.locateError':
     "We couldn't find your location. Move the map to your farm instead.",
   'map.tilesSlow': 'Map pictures are slow to load.',
+  'map.title': 'My farms',
+  'map.legend': 'Tap a farm to see more',
+  'map.openFarm': 'Open farm',
+  'map.health': 'Farm health',
+  'map.farmList': 'Your farms',
+  'map.showAll': 'Show all farms',
   'farm.cropTile': '{crop} growing on {name}',
   'boundary.introTitle': 'How do you want to mark your farm?',
   'boundary.introBody':
