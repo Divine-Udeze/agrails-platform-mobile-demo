@@ -16,6 +16,8 @@ interface Props {
   ariaLabel: string
   reference?: { value: number; label: string }
   height?: number
+  /** draw each bar's formatted value above it (replaces the y-axis tick labels) */
+  showValues?: boolean
 }
 
 const W = 320
@@ -28,6 +30,7 @@ export function BarChart({
   ariaLabel,
   reference,
   height = 190,
+  showValues = false,
 }: Props) {
   const [active, setActive] = useState<number | null>(null)
   const n = bars.length
@@ -35,10 +38,12 @@ export function BarChart({
   const ticks = niceTicks(0, maxVal || 1, 4)
   const hi = ticks[ticks.length - 1]
   const tickLabels = ticks.map((v) => formatValue(v))
-  const padL = Math.max(
-    PAD.l,
-    Math.ceil(Math.max(...tickLabels.map((s) => s.length)) * CHAR_W) + 12,
-  )
+  const padL = showValues
+    ? PAD.r
+    : Math.max(
+        PAD.l,
+        Math.ceil(Math.max(...tickLabels.map((s) => s.length)) * CHAR_W) + 12,
+      )
   const y = linearScale([0, hi], [height - PAD.b, PAD.t])
   const slot = (W - padL - PAD.r) / Math.max(1, n)
   const barW = slot * 0.62
@@ -73,14 +78,16 @@ export function BarChart({
               y1={y(t)}
               y2={y(t)}
             />
-            <text
-              className={styles.axisText}
-              x={padL - 6}
-              y={y(t) + 4}
-              textAnchor='end'
-            >
-              {tickLabels[ti]}
-            </text>
+            {!showValues && (
+              <text
+                className={styles.axisText}
+                x={padL - 6}
+                y={y(t) + 4}
+                textAnchor='end'
+              >
+                {tickLabels[ti]}
+              </text>
+            )}
           </g>
         ))}
         {bars.map((b, i) => {
@@ -102,6 +109,19 @@ export function BarChart({
             />
           )
         })}
+        {showValues &&
+          bars.map((b, i) => (
+            <text
+              key={b.label}
+              data-value={b.label}
+              className={styles.valueText}
+              x={cx(i)}
+              y={y(Math.max(0, b.value)) - 6}
+              textAnchor='middle'
+            >
+              {formatValue(b.value)}
+            </text>
+          ))}
         {reference && (
           <g>
             <line

@@ -269,6 +269,39 @@ export const en = {
   'report.year': 'Year',
   'report.rain': 'Rain (mm)',
   'report.harvest': 'Harvest (t/ha)',
+  'plans.title': 'Choose your cover',
+  'plans.intro': 'Pick how much protection you want for {name}.',
+  'plans.recommended': 'Most popular',
+  'plans.trigger': 'Pays out if area harvest falls below {pct}% of normal',
+  'plans.perSeason': 'per season',
+  'plans.cover': 'Cover up to {amount}',
+  'plans.payoutZone': 'Payout zone',
+  'plans.continue': 'Continue',
+  'plans.alreadyTitle': 'This farm is already insured',
+  'plans.alreadyBody': 'Your cover is active until {date}.',
+  'plans.viewPolicy': 'View policy',
+  'quote.title': 'Your price',
+  'quote.youPayBig': 'You pay {amount}',
+  'quote.subsidyNote': 'The government pays half of your premium.',
+  'quote.split': 'Who pays the premium',
+  'quote.govPays': 'Government pays',
+  'quote.youPay': 'You pay',
+  'quote.total': 'total',
+  'quote.cover': 'Cover',
+  'quote.period': 'Cover period',
+  'quote.exampleTitle': 'What you could get back',
+  'quote.example':
+    'If harvests in your area drop to half of normal, you receive about {amount}.',
+  'quote.youGet': 'You get',
+  'quote.compare': 'What you pay compared with what you could get',
+  'quote.howTitle': 'How it works',
+  'quote.how1':
+    'Satellites watch rain and crop health in your area all season.',
+  'quote.how2':
+    'After harvest, we compare your area harvest with normal years.',
+  'quote.how3':
+    'If it is below {pct}%, money is sent to your M-Pesa. No claim forms.',
+  'quote.pay': 'Pay {amount} with M-Pesa',
 }
 
 export type StringKey = keyof typeof en

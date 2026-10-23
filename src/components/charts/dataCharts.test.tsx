@@ -1,6 +1,7 @@
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { BarChart } from '@/src/components/charts/BarChart'
+import { Donut } from '@/src/components/charts/Donut'
 import { LineChart } from '@/src/components/charts/LineChart'
 import { RangeStrip } from '@/src/components/charts/RangeStrip'
 
@@ -102,4 +103,60 @@ test('BarChart widens the left pad for long tick labels', () => {
   const svg = screen.getByRole('img', { name: 'Rain' })
   const first = svg.querySelector('line') as Element
   expect(Number(first.getAttribute('x1'))).toBeGreaterThan(36)
+})
+
+test('BarChart showValues labels each bar and drops the tick labels', () => {
+  render(
+    <BarChart
+      bars={[
+        { label: 'A', value: 2520 },
+        { label: 'B', value: 14400 },
+      ]}
+      showValues
+      formatValue={(v) => `KES ${v}`}
+      ariaLabel='Compare'
+    />,
+  )
+  const svg = screen.getByRole('img', { name: 'Compare' })
+  expect(svg.querySelector('[data-value="A"]')).toHaveTextContent('KES 2520')
+  expect(svg.querySelector('[data-value="B"]')).toHaveTextContent('KES 14400')
+  expect(svg.querySelectorAll('text')).toHaveLength(4)
+})
+
+test('Donut renders segments, centre label and formatted legend values', () => {
+  const { container } = render(
+    <Donut
+      ariaLabel='Split'
+      centerLabel='5,040'
+      centerSub='total'
+      formatValue={(v) => `KES ${v}`}
+      segments={[
+        { label: 'Gov', value: 2520, color: 'red' },
+        { label: 'You', value: 2520, color: 'green' },
+      ]}
+    />,
+  )
+  expect(screen.getByRole('img', { name: 'Split' })).toBeInTheDocument()
+  expect(container.querySelectorAll('[data-segment]')).toHaveLength(2)
+  expect(screen.getByText('5,040')).toBeInTheDocument()
+  expect(screen.getByText('total')).toBeInTheDocument()
+  const rows = container.querySelectorAll('li')
+  expect(rows).toHaveLength(2)
+  expect(rows[0]).toHaveTextContent('Gov')
+  expect(rows[0]).toHaveTextContent('KES 2520')
+  expect(rows[1]).toHaveTextContent('You')
+  expect(rows[1]).toHaveTextContent('KES 2520')
+  expect(screen.getByText('5,040')).toHaveAttribute('data-size', 'lg')
+})
+
+test('Donut steps the centre text down for long figures', () => {
+  render(
+    <Donut
+      ariaLabel='Split'
+      centerLabel='294,000'
+      formatValue={String}
+      segments={[{ label: 'A', value: 1, color: 'red' }]}
+    />,
+  )
+  expect(screen.getByText('294,000')).toHaveAttribute('data-size', 'sm')
 })

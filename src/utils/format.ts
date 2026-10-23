@@ -72,3 +72,8 @@ export function todayISO(now: Date = new Date()): string {
   const dd = String(now.getDate()).padStart(2, '0')
   return `${now.getFullYear()}-${mm}-${dd}`
 }
+
+/** Rounds to a whole number with thousands separators: 12,500. */
+export function formatNumber(n: number): string {
+  return Math.round(n).toLocaleString('en-US')
+}

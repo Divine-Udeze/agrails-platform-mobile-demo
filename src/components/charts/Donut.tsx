@@ -17,6 +17,12 @@ interface Props {
   ariaLabel: string
 }
 
+/** Steps the centre text down so long figures stay inside the ring. */
+function labelSize(label: ReactNode): 'lg' | 'md' | 'sm' {
+  const len = typeof label === 'string' ? label.length : 0
+  return len <= 5 ? 'lg' : len === 6 ? 'md' : 'sm'
+}
+
 export function Donut({
   segments,
   size = 128,
@@ -72,7 +78,12 @@ export function Donut({
         </svg>
         <div className={styles.ringCenter} aria-hidden='true'>
           {centerLabel && (
-            <span className={styles.ringLabel}>{centerLabel}</span>
+            <span
+              className={styles.ringLabel}
+              data-size={labelSize(centerLabel)}
+            >
+              {centerLabel}
+            </span>
           )}
           {centerSub && <span className={styles.ringSub}>{centerSub}</span>}
         </div>

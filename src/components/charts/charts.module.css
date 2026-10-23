@@ -59,6 +59,12 @@
   font-weight: 800;
   font-size: var(--fs-xl);
 }
+.ringLabel[data-size='md'] {
+  font-size: var(--fs-lg);
+}
+.ringLabel[data-size='sm'] {
+  font-size: var(--fs-md);
+}
 .ringSub {
   font-size: var(--fs-xs);
   color: var(--ink-3);
@@ -66,6 +72,8 @@
 
 .donut {
   display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
   align-items: center;
   gap: var(--sp-4);
 }
@@ -75,7 +83,8 @@
   padding: 0;
   display: grid;
   gap: var(--sp-2);
-  flex: 1;
+  flex: 1 1 180px;
+  min-width: 0;
 }
 .legendRow {
   display: flex;
@@ -85,6 +94,7 @@
 }
 .legendRow strong {
   margin-left: auto;
+  white-space: nowrap;
 }
 .swatch {
   width: 12px;
@@ -130,4 +140,10 @@
 .hit {
   fill: transparent;
   cursor: pointer;
+}
+
+.valueText {
+  fill: var(--ink);
+  font-size: 14px;
+  font-weight: 700;
 }

@@ -4,6 +4,7 @@ import {
   formatDate,
   formatHa,
   formatKES,
+  formatNumber,
   formatPhone,
   formatShortDate,
   groupLocalPhone,
@@ -56,4 +57,10 @@ test('maskPhone hides the middle digits of the phone on file', () => {
 test('todayISO uses local date parts', () => {
   expect(todayISO(new Date(2026, 9, 23, 1, 30))).toBe('2026-10-23')
   expect(todayISO(new Date(2026, 0, 5, 23, 59))).toBe('2026-01-05')
+})
+
+test('formats plain numbers with grouping', () => {
+  expect(formatNumber(12500)).toBe('12,500')
+  expect(formatNumber(999.6)).toBe('1,000')
+  expect(formatNumber(0)).toBe('0')
 })
