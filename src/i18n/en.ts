@@ -176,7 +176,39 @@ export const en = {
   'addFarm.toBoundary': 'Next: mark your farm',
   'editFarm.save': 'Save changes',
   'editFarm.saveError': "We couldn't save your changes. Please try again.",
+  'boundary.locateError':
+    "We couldn't find your location. Move the map to your farm instead.",
+  'map.tilesSlow': 'Map pictures are slow to load.',
   'farm.cropTile': '{crop} growing on {name}',
+  'boundary.introTitle': 'How do you want to mark your farm?',
+  'boundary.introBody':
+    'We use the shape of your farm to watch it from space and to price your cover.',
+  'boundary.tap.title': 'Tap the corners on a map',
+  'boundary.tap.body': 'See your farm from above and tap each corner.',
+  'boundary.walk.title': 'Walk around your farm',
+  'boundary.walk.body': 'Walk along the edge. Your phone GPS draws the shape.',
+  'boundary.draw.title': 'Draw with your finger',
+  'boundary.draw.body': 'Trace the outline of your farm on the map.',
+  'boundary.recommended': 'Easiest',
+  'boundary.quick': 'Quick: just drop a pin',
+  'boundary.mapTitle': 'Mark your farm',
+  'boundary.tapHint': 'Tap each corner of your farm. You need at least 3.',
+  'boundary.area': '{ha} · {acres}',
+  'boundary.points': '{n} corners marked',
+  'boundary.undo': 'Undo',
+  'boundary.done': 'Done',
+  'boundary.myLocation': 'Go to my location',
+  'boundary.error.too_few_points': 'Mark at least 3 corners.',
+  'boundary.error.self_intersecting':
+    'The lines cross each other. Undo the last corner and try again.',
+  'boundary.error.too_small':
+    'This is smaller than 0.05 ha. Check the corners.',
+  'boundary.error.too_large': 'This is bigger than 50 ha. Check the corners.',
+  'quick.title': 'Drop a pin on your farm',
+  'quick.hint': 'Tap the middle of your farm, then choose its size.',
+  'quick.size': 'About how big is it?',
+  'quick.acres': '{n} acres',
+  'quick.acre': '{n} acre',
 }
 
 export type StringKey = keyof typeof en
