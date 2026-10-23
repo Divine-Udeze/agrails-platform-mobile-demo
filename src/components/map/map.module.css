@@ -1,0 +1,281 @@
+.mapScreen {
+  position: relative;
+  height: 100vh;
+  height: 100dvh;
+  max-width: 560px;
+  margin: 0 auto;
+  overflow: hidden;
+  background: #183d26;
+}
+.mapFill {
+  position: absolute;
+  inset: 0;
+  z-index: 0; /* contain Leaflet's own z-indexes below the header, panel and overlays */
+}
+/*
+ * Vertical layout under the header, top to bottom:
+ *   --map-top        header: tap target + gutter + safe area
+ *   + --leaflet-ctrl-margin
+ *   + --attr-h       attribution, fixed height (font is inherited, so pin it)
+ *   + --sp-2         gap
+ *   = banner top
+ * so the slow-tiles banner always sits below the attribution.
+ */
+.mapScreen {
+  --map-top: calc(var(--tap) + var(--sp-4) + env(safe-area-inset-top));
+  --leaflet-ctrl-margin: 10px; /* Leaflet's built-in margin around each control */
+  --attr-h: 18px; /* attribution height we pin (font is inherited) */
+}
+.mapFill :global(.leaflet-top.leaflet-right) {
+  margin-top: var(--map-top);
+}
+.mapFill :global(.leaflet-control-attribution) {
+  font-size: var(--fs-xs);
+  line-height: var(--attr-h);
+  height: var(--attr-h);
+  padding: 0 var(--sp-1);
+}
+.banner {
+  position: absolute;
+  left: var(--sp-3);
+  right: var(--sp-3);
+  top: calc(
+    var(--map-top) + var(--leaflet-ctrl-margin) + var(--attr-h) + var(--sp-2)
+  );
+  z-index: 500;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sp-3);
+  padding: var(--sp-2) var(--sp-3);
+  border-radius: var(--radius);
+  background: var(--surface);
+  box-shadow: var(--shadow);
+  font-size: var(--fs-md);
+  font-weight: 700;
+}
+.banner button {
+  min-height: var(--tap);
+  min-width: var(--tap);
+  padding: 0 var(--sp-3);
+  border: 2px solid var(--green-700);
+  border-radius: var(--radius);
+  background: var(--surface);
+  font-weight: 700;
+  cursor: pointer;
+}
+.mapFill :global(.leaflet-container) {
+  width: 100%;
+  height: 100%;
+  background: #183d26;
+  font: inherit;
+}
+.top {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 500;
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  padding: calc(var(--sp-2) + env(safe-area-inset-top)) var(--sp-3) var(--sp-2);
+  background: linear-gradient(
+    to bottom,
+    rgba(15, 61, 33, 0.75),
+    rgba(15, 61, 33, 0)
+  );
+  color: #fff;
+}
+.top h1 {
+  margin: 0;
+  font-size: var(--fs-lg);
+  font-weight: 800;
+}
+.roundBtn {
+  width: var(--tap);
+  height: var(--tap);
+  border-radius: 50%;
+  border: 0;
+  background: var(--surface);
+  color: var(--ink);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: var(--shadow);
+  cursor: pointer;
+  flex: none;
+}
+.panel {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 500;
+  background: var(--surface);
+  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+  padding: var(--sp-4) var(--sp-4)
+    calc(var(--sp-4) + env(safe-area-inset-bottom));
+  box-shadow: 0 -6px 24px rgba(0, 0, 0, 0.15);
+}
+.overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 600;
+  background: var(--bg);
+  overflow-y: auto;
+}
+.fab {
+  position: absolute;
+  right: var(--sp-3);
+  z-index: 500;
+}
+.drawLayer {
+  position: absolute;
+  inset: 0;
+  z-index: 450;
+  touch-action: none;
+}
+.areaReadout {
+  font-size: var(--fs-xl);
+  font-weight: 800;
+}
+.sizeRow {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--sp-2);
+}
+.sizeChip {
+  min-height: var(--tap);
+  border-radius: var(--radius);
+  border: 2px solid var(--line);
+  background: var(--surface);
+  font-weight: 700;
+  cursor: pointer;
+}
+.sizeChip[aria-checked='true'] {
+  border-color: var(--green-700);
+  background: var(--green-100);
+}
+.methodCard {
+  display: grid;
+  grid-template-columns: 56px 1fr auto;
+  gap: var(--sp-3);
+  align-items: center;
+  width: 100%;
+  text-align: left;
+  border: 0;
+  cursor: pointer;
+}
+.methodIcon {
+  width: 56px;
+  height: 56px;
+  border-radius: var(--radius);
+  background: var(--green-100);
+  color: var(--green-700);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+:global(.farm-label) {
+  background: rgba(15, 61, 33, 0.85);
+  color: #fff;
+  border: 0;
+  border-radius: 8px;
+  font-weight: 700;
+  box-shadow: none;
+}
+:global(.farm-label)::before {
+  display: none;
+}
+
+.roundBtn:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.panelWithNav {
+  bottom: calc(var(--nav-h) + env(safe-area-inset-bottom));
+  border-radius: var(--radius-lg);
+  margin: 0 var(--sp-2) var(--sp-2);
+  padding-bottom: var(--sp-4);
+}
+.overlayWithNav {
+  bottom: calc(var(--nav-h) + env(safe-area-inset-bottom));
+}
+
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-2);
+}
+.legendHint {
+  margin: var(--sp-2) 0 0;
+}
+.farmList {
+  display: flex;
+  gap: var(--sp-2);
+  margin: var(--sp-3) calc(var(--sp-4) * -1) 0;
+  padding: 0 var(--sp-4);
+  overflow-x: auto;
+  list-style: none;
+}
+.farmBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-2);
+  min-height: var(--tap);
+  padding: 0 var(--sp-4);
+  border: 2px solid var(--line);
+  border-radius: var(--radius-pill);
+  background: var(--surface);
+  color: var(--ink);
+  font-size: var(--fs-md);
+  font-weight: 700;
+  white-space: nowrap;
+  cursor: pointer;
+}
+.farmDot {
+  --dot-size: 12px; /* status dot in the farm list */
+  width: var(--dot-size);
+  height: var(--dot-size);
+  border-radius: 50%;
+  flex: none;
+}
+.farmDot[data-status='good'] {
+  background: var(--good);
+}
+.farmDot[data-status='warning'] {
+  background: var(--warning);
+}
+.farmDot[data-status='danger'] {
+  background: var(--danger);
+}
+.sheetBody {
+  display: grid;
+  gap: var(--sp-3);
+}
+.sheetBadges {
+  display: flex;
+  gap: var(--sp-2);
+}
+.legendRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sp-2);
+}
+.showAll {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--tap);
+  padding: 0 var(--sp-3);
+  border: 2px solid var(--green-700);
+  border-radius: var(--radius-pill);
+  background: var(--surface);
+  color: var(--green-700);
+  font-size: var(--fs-md);
+  font-weight: 700;
+  white-space: nowrap;
+  cursor: pointer;
+}

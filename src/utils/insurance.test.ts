@@ -2,6 +2,7 @@ import type { Farm } from '@/src/types'
 import {
   buildQuote,
   coverageWindow,
+  nairobiMidnight,
   payoutAmount,
   premiumBreakdown,
   roundTo10,
@@ -51,16 +52,62 @@ test('payout is zero at or above the trigger and proportional below it', () => {
   expect(payoutAmount(43200, 60, 0)).toBe(43200)
 })
 
-test('coverage window is the current season if not yet over, else next year', () => {
-  const today = new Date('2026-10-22T00:00:00.000Z')
+test('coverage window: before the season starts, cover starts on its first day', () => {
+  const today = new Date('2026-08-15T10:30:00.000Z')
   expect(coverageWindow('short_rains', today)).toEqual({
     start: '2026-10-01T00:00:00.000Z',
     end: '2026-12-31T00:00:00.000Z',
   })
+})
+
+test('coverage window: mid-season, cover starts today at UTC midnight', () => {
+  const today = new Date('2026-10-23T14:45:00.000Z')
+  expect(coverageWindow('short_rains', today)).toEqual({
+    start: '2026-10-23T00:00:00.000Z',
+    end: '2026-12-31T00:00:00.000Z',
+  })
+})
+
+test('coverage window: after the season, rolls to next year from its first day', () => {
+  const today = new Date('2026-10-23T00:00:00.000Z')
   expect(coverageWindow('long_rains', today)).toEqual({
     start: '2027-03-01T00:00:00.000Z',
     end: '2027-07-31T00:00:00.000Z',
   })
+})
+
+test('coverage window: first day of the season starts that day', () => {
+  expect(
+    coverageWindow('short_rains', new Date('2026-10-01T09:00:00.000Z')),
+  ).toEqual({
+    start: '2026-10-01T00:00:00.000Z',
+    end: '2026-12-31T00:00:00.000Z',
+  })
+})
+
+test('coverage window: exactly 30 days left is still this season', () => {
+  expect(
+    coverageWindow('short_rains', new Date('2026-12-01T09:00:00.000Z')),
+  ).toEqual({
+    start: '2026-12-01T00:00:00.000Z',
+    end: '2026-12-31T00:00:00.000Z',
+  })
+})
+
+test('coverage window: under 30 days left quotes next year', () => {
+  expect(
+    coverageWindow('short_rains', new Date('2026-12-15T09:00:00.000Z')),
+  ).toEqual({
+    start: '2027-10-01T00:00:00.000Z',
+    end: '2027-12-31T00:00:00.000Z',
+  })
+})
+
+test('coverage window uses the Nairobi date, not the UTC date', () => {
+  // 01:30 on 23 Oct in Nairobi
+  expect(
+    coverageWindow('short_rains', new Date('2026-10-22T22:30:00.000Z')).start,
+  ).toBe('2026-10-23T00:00:00.000Z')
 })
 
 test('buildQuote combines all pricing rules', () => {
@@ -80,5 +127,16 @@ test('buildQuote combines all pricing rules', () => {
     coverageStart: '2027-03-01T00:00:00.000Z',
     coverageEnd: '2027-07-31T00:00:00.000Z',
     exampleAt50PctKES: 28800,
+  })
+})
+
+describe('nairobiMidnight', () => {
+  test('is the Nairobi calendar date at UTC midnight', () => {
+    expect(nairobiMidnight(new Date('2026-12-30T20:59:59.000Z'))).toBe(
+      Date.UTC(2026, 11, 30),
+    )
+    expect(nairobiMidnight(new Date('2026-12-30T21:00:00.000Z'))).toBe(
+      Date.UTC(2026, 11, 31),
+    )
   })
 })

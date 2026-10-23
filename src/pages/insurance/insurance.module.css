@@ -1,0 +1,121 @@
+.planCard {
+  position: relative;
+  width: 100%;
+  text-align: left;
+  border: 3px solid transparent;
+  cursor: pointer;
+}
+.planCard[aria-checked='true'] {
+  border-color: var(--green-700);
+}
+.badge {
+  position: absolute;
+  top: -12px;
+  right: var(--sp-4);
+}
+.price {
+  font-size: var(--fs-2xl);
+  font-weight: 800;
+  color: var(--green-900);
+}
+.trigger {
+  width: 100%;
+  height: auto;
+}
+.bigPay {
+  text-align: center;
+  padding: var(--sp-5) var(--sp-4);
+  background: linear-gradient(135deg, var(--green-700), var(--green-500));
+  color: #fff;
+  border-radius: var(--radius-lg);
+}
+.bigPay .figure {
+  color: #fff;
+}
+.how {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: var(--sp-3);
+}
+.how li {
+  display: grid;
+  grid-template-columns: 44px 1fr;
+  gap: var(--sp-3);
+  align-items: center;
+}
+.howIcon {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: var(--green-100);
+  color: var(--green-700);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.pulse {
+  animation: pulse 1.4s var(--ease) infinite;
+}
+@keyframes pulse {
+  50% {
+    transform: scale(1.06);
+  }
+}
+.confetti {
+  animation: pop 700ms var(--ease) both;
+}
+@keyframes pop {
+  from {
+    transform: scale(0.6);
+    opacity: 0;
+  }
+}
+.certificate {
+  border: 2px dashed var(--green-300);
+  background: linear-gradient(180deg, var(--surface), var(--green-100));
+}
+.certRow {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--sp-3);
+  padding: var(--sp-2) 0;
+  border-bottom: 1px solid var(--line);
+}
+.certRow:last-child {
+  border-bottom: 0;
+}
+.certRow span:first-child {
+  color: var(--ink-3);
+}
+.certRow span:last-child {
+  font-weight: 700;
+  text-align: right;
+}
+
+.bigPay .heroFigure {
+  font-size: var(--fs-2xl);
+  line-height: 1.15;
+  margin: var(--sp-2) 0;
+}
+.tbSafe {
+  fill: var(--good-bg);
+}
+.tbPay {
+  fill: var(--danger-bg);
+}
+.tbLine {
+  stroke: var(--danger);
+  stroke-width: 3;
+}
+.tbPct {
+  fill: var(--danger);
+  /* 200-unit viewBox, 250px wide on a 320px screen (320 - 2x16 padding - 2x3 border - 2x16 card padding): 11.5 units = 14.4px */
+  font-size: 11.5px;
+  font-weight: 700;
+}
+.tbZone {
+  fill: var(--ink-2);
+  font-size: 11.5px;
+}

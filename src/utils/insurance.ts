@@ -34,14 +34,48 @@ export function payoutAmount(
   return roundTo10(sumInsuredKES * share)
 }
 
+/** Kenya is UTC+3 all year (no daylight saving). */
+const NAIROBI_OFFSET_MS = 3 * 3600_000
+const DAY_MS = 86_400_000
+
+/** The Nairobi calendar date of `now`, as ms at UTC midnight (matches stored dates). */
+export function nairobiMidnight(now: Date = new Date()): number {
+  const local = new Date(now.getTime() + NAIROBI_OFFSET_MS)
+  return Date.UTC(
+    local.getUTCFullYear(),
+    local.getUTCMonth(),
+    local.getUTCDate(),
+  )
+}
+/** With less cover than this left in the running season, quote next season. */
+const MIN_COVER_DAYS = 30
+
+/**
+ * The cover period to quote. Cover starts today (Nairobi date, at UTC
+ * midnight) when the season is running with at least 30 days left; otherwise
+ * it is the season's first day, next year if this season is over or nearly so.
+ */
 export function coverageWindow(season: Season, today: Date = new Date()) {
   const { startMonth, endMonth } = SEASON_WINDOWS[season]
-  const year =
-    today.getUTCMonth() > endMonth
-      ? today.getUTCFullYear() + 1
-      : today.getUTCFullYear()
+  const todayMidnight = nairobiMidnight(today)
+  const local = new Date(todayMidnight)
+  const month = local.getUTCMonth()
+  let year = local.getUTCFullYear()
+  let start = Date.UTC(year, startMonth, 1)
+  if (month > endMonth) {
+    year += 1
+    start = Date.UTC(year, startMonth, 1)
+  } else if (month >= startMonth) {
+    const end = Date.UTC(year, endMonth + 1, 0)
+    if (end - todayMidnight < MIN_COVER_DAYS * DAY_MS) {
+      year += 1
+      start = Date.UTC(year, startMonth, 1)
+    } else {
+      start = todayMidnight
+    }
+  }
   return {
-    start: new Date(Date.UTC(year, startMonth, 1)).toISOString(),
+    start: new Date(start).toISOString(),
     end: new Date(Date.UTC(year, endMonth + 1, 0)).toISOString(),
   }
 }

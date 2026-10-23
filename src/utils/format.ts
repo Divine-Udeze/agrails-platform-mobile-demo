@@ -15,8 +15,14 @@ const MONTHS = [
   'Dec',
 ]
 
+/** KES amount; a non-breaking space keeps "KES" and the number on one line. */
 export function formatKES(amount: number): string {
-  return `KES ${Math.round(amount).toLocaleString('en-US')}`
+  return `KES\u00a0${Math.round(amount).toLocaleString('en-US')}`
+}
+
+/** Keeps text on one line: every space becomes a non-breaking space. */
+export function noWrap(s: string): string {
+  return s.replace(/ /g, '\u00a0')
 }
 
 export function haToAcres(ha: number): number {
@@ -64,4 +70,16 @@ export function groupLocalPhone(input: string): string {
 export function maskPhone(e164: string): string {
   const local = e164.replace(/^\+254/, '')
   return `+254 ${local[0]}•• ••• ${local.slice(-3)}`
+}
+
+/** Today's date as YYYY-MM-DD in the device's local time zone. */
+export function todayISO(now: Date = new Date()): string {
+  const mm = String(now.getMonth() + 1).padStart(2, '0')
+  const dd = String(now.getDate()).padStart(2, '0')
+  return `${now.getFullYear()}-${mm}-${dd}`
+}
+
+/** Rounds to a whole number with thousands separators: 12,500. */
+export function formatNumber(n: number): string {
+  return Math.round(n).toLocaleString('en-US')
 }

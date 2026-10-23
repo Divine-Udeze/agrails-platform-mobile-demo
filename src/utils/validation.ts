@@ -2,7 +2,8 @@
 export function normalizeKenyanPhone(input: string): string | null {
   let digits = input.replace(/\D/g, '')
   if (digits.startsWith('254')) digits = digits.slice(3)
-  else if (digits.startsWith('0')) digits = digits.slice(1)
+  // a local 0 may follow the country code too: "+254 0712 345 678"
+  if (digits.startsWith('0')) digits = digits.slice(1)
   return /^[17]\d{8}$/.test(digits) ? `+254${digits}` : null
 }
 

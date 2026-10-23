@@ -1,4 +1,5 @@
 import { useId, useState } from 'react'
+import { CHAR_W } from '@/src/components/charts/geometry'
 import { ChartTooltip } from '@/src/components/charts/ChartTooltip'
 import styles from '@/src/components/charts/charts.module.css'
 import {
@@ -23,6 +24,25 @@ interface Props {
 
 const W = 320
 const PAD = { l: 36, r: 12, t: 28, b: 26 }
+
+/**
+ * Header label for the marker: anchored to the marker's x (end-aligned in the
+ * right third, start-aligned in the left third, centred otherwise), clamped to
+ * the chart. If that would run into the band key, it moves to the right edge.
+ */
+function placeMarkerLabel(mx: number, w: number, keyEnd: number) {
+  const frac = (mx - PAD.l) / (W - PAD.l - PAD.r)
+  const anchor = frac > 2 / 3 ? 'end' : frac < 1 / 3 ? 'start' : 'middle'
+  const x =
+    anchor === 'end'
+      ? Math.min(W, Math.max(w, mx))
+      : anchor === 'start'
+        ? Math.max(0, Math.min(W - w, mx))
+        : Math.max(w / 2, Math.min(W - w / 2, mx))
+  const left = anchor === 'end' ? x - w : anchor === 'start' ? x : x - w / 2
+  if (left < keyEnd) return { x: W - PAD.r, anchor: 'end' as const }
+  return { x, anchor: anchor as 'start' | 'middle' | 'end' }
+}
 
 export function LineChart({
   values,
@@ -54,6 +74,15 @@ export function LineChart({
   const labelIdx =
     n > 2 ? [0, Math.floor((n - 1) / 2), n - 1] : [...Array(n).keys()]
 
+  const todayLabel =
+    markerIndex !== undefined && markerIndex < n && markerLabel
+      ? placeMarkerLabel(
+          x(markerIndex),
+          Math.ceil(markerLabel.length * CHAR_W),
+          band ? PAD.l + 20 + Math.ceil(band.label.length * CHAR_W) + 8 : 0,
+        )
+      : null
+
   return (
     <div className={styles.chart}>
       {active !== null && (
@@ -75,6 +104,43 @@ export function LineChart({
             <stop offset='100%' stopColor={color} stopOpacity={0} />
           </linearGradient>
         </defs>
+        {(band || (markerIndex !== undefined && markerLabel)) && (
+          <g data-testid='chart-header'>
+            {band && (
+              <>
+                <rect
+                  data-testid='band-key'
+                  x={PAD.l}
+                  y={5}
+                  width={14}
+                  height={12}
+                  rx={3}
+                  fill='var(--green-100)'
+                  stroke='var(--green-300)'
+                />
+                <text
+                  className={styles.refText}
+                  x={PAD.l + 20}
+                  y={16}
+                  textAnchor='start'
+                >
+                  {band.label}
+                </text>
+              </>
+            )}
+            {todayLabel && (
+              <text
+                data-testid='marker-label'
+                className={styles.refText}
+                x={todayLabel.x}
+                y={16}
+                textAnchor={todayLabel.anchor}
+              >
+                {markerLabel}
+              </text>
+            )}
+          </g>
+        )}
         {ticks.map((t) => (
           <g key={t}>
             <line
@@ -107,18 +173,11 @@ export function LineChart({
               fill='var(--green-100)'
               opacity={0.8}
             />
-            <text
-              className={styles.refText}
-              x={W - PAD.r - 4}
-              y={y(Math.min(hi, band.to)) + 14}
-              textAnchor='end'
-            >
-              {band.label}
-            </text>
           </g>
         )}
         <path d={area} fill={`url(#${gradientId})`} />
         <path
+          data-testid='line-path'
           d={line}
           fill='none'
           stroke={color}
@@ -131,7 +190,7 @@ export function LineChart({
             <line
               x1={x(markerIndex)}
               x2={x(markerIndex)}
-              y1={PAD.t - 8}
+              y1={PAD.t - 4}
               y2={height - PAD.b}
               stroke='var(--gold-500)'
               strokeWidth={2}
@@ -145,16 +204,6 @@ export function LineChart({
               stroke='#fff'
               strokeWidth={2}
             />
-            {markerLabel && (
-              <text
-                className={styles.refText}
-                x={x(markerIndex)}
-                y={PAD.t - 12}
-                textAnchor='end'
-              >
-                {markerLabel}
-              </text>
-            )}
           </g>
         )}
         {active !== null && (
@@ -178,18 +227,24 @@ export function LineChart({
             {labels[i]}
           </text>
         ))}
-        {values.map((_, i) => (
-          <rect
-            key={i}
-            data-testid={`hit-${i}`}
-            className={styles.hit}
-            x={x(i) - step / 2}
-            width={step}
-            y={PAD.t}
-            height={height - PAD.t - PAD.b}
-            onClick={() => setActive(active === i ? null : i)}
-          />
-        ))}
+        <rect
+          data-testid='plot-hit'
+          className={styles.hit}
+          x={0}
+          width={W}
+          y={0}
+          height={height - PAD.b}
+          onClick={(e) => {
+            const box = e.currentTarget.getBoundingClientRect()
+            if (!box.width) return
+            const px = ((e.clientX - box.left) / box.width) * W
+            const i = Math.min(
+              n - 1,
+              Math.max(0, Math.round((px - PAD.l) / (step || 1))),
+            )
+            setActive(active === i ? null : i)
+          }}
+        />
       </svg>
     </div>
   )

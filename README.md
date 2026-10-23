@@ -25,13 +25,7 @@ npm run dev        # http://localhost:3000 (bound to 0.0.0.0 for device testing)
 
 ### Environment
 
-Create `.env.local` in the project root:
-
-```
-GEMINI_API_KEY=your_key_here
-```
-
-Vite injects this as `process.env.GEMINI_API_KEY` / `process.env.API_KEY` (see `vite.config.ts`). The key is reserved for upcoming Gemini AI features; the app runs fine without it today.
+No environment variables or API keys are needed: all data is mocked.
 
 ### Scripts
 

@@ -4,17 +4,20 @@ import {
   formatDate,
   formatHa,
   formatKES,
+  formatNumber,
   formatPhone,
-  groupLocalPhone,
-  maskPhone,
   formatShortDate,
+  groupLocalPhone,
   haToAcres,
+  maskPhone,
+  noWrap,
+  todayISO,
 } from '@/src/utils/format'
 
 test('formats KES with thousands separators and no decimals', () => {
-  expect(formatKES(12500)).toBe('KES 12,500')
-  expect(formatKES(1234.6)).toBe('KES 1,235')
-  expect(formatKES(0)).toBe('KES 0')
+  expect(formatKES(12500)).toBe('KES\u00a012,500')
+  expect(formatKES(1234.6)).toBe('KES\u00a01,235')
+  expect(formatKES(0)).toBe('KES\u00a00')
 })
 
 test('converts between hectares and acres', () => {
@@ -50,4 +53,26 @@ test.each([
 test('maskPhone hides the middle digits of the phone on file', () => {
   expect(maskPhone('+254712345678')).toBe('+254 7•• ••• 678')
   expect(maskPhone('+254722111222')).toBe('+254 7•• ••• 222')
+})
+
+test('todayISO uses local date parts', () => {
+  expect(todayISO(new Date(2026, 9, 23, 1, 30))).toBe('2026-10-23')
+  expect(todayISO(new Date(2026, 0, 5, 23, 59))).toBe('2026-01-05')
+})
+
+test('formats plain numbers with grouping', () => {
+  expect(formatNumber(12500)).toBe('12,500')
+  expect(formatNumber(999.6)).toBe('1,000')
+  expect(formatNumber(0)).toBe('0')
+})
+
+describe('formatKES', () => {
+  test('keeps KES and the amount together with a non-breaking space', () => {
+    expect(formatKES(10800)).toBe('KES\u00a010,800')
+    expect(formatKES(10800)).not.toContain(' ')
+  })
+})
+
+test('noWrap turns every space into a non-breaking space', () => {
+  expect(noWrap('1 Mar 2026')).toBe('1\u00a0Mar\u00a02026')
 })

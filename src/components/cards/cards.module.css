@@ -1,0 +1,139 @@
+.farmCard {
+  display: grid;
+  grid-template-columns: 64px 1fr;
+  align-items: start;
+  gap: var(--sp-3);
+}
+.title {
+  font-weight: 800;
+  font-size: var(--fs-lg);
+  line-height: 1.2;
+}
+.meta {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--ink-3);
+  font-size: var(--fs-sm);
+  margin: 2px 0 6px;
+  min-width: 0;
+}
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.trend {
+  margin-top: 6px;
+}
+.farmCard > div {
+  min-width: 0;
+}
+.metaText {
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.coverText {
+  font-size: var(--fs-md);
+  font-weight: 800;
+  color: var(--ink);
+}
+.coverTrack {
+  position: relative;
+  height: 10px;
+  border-radius: var(--radius-pill);
+  background: var(--line);
+  overflow: hidden;
+  margin: var(--sp-2) 0 var(--sp-1);
+}
+.coverFill {
+  position: absolute;
+  inset: 0;
+  background: var(--green-500);
+  transform-origin: left;
+}
+.coverDates {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--sp-3);
+  color: var(--ink-3);
+  font-size: var(--fs-md);
+  white-space: nowrap;
+}
+.avatar {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  background: var(--green-700);
+  color: var(--surface);
+  font-size: var(--fs-xl);
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+}
+.profileText {
+  min-width: 0;
+  font-size: var(--fs-md);
+}
+.profileText > * {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.profileMuted {
+  color: var(--ink-3);
+}
+.infoRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sp-3);
+  min-height: var(--tap);
+  font-size: var(--fs-md);
+}
+.infoValue {
+  font-weight: 700;
+  text-align: right;
+}
+.policyRow {
+  display: block;
+  min-height: var(--tap);
+}
+.policyTop {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: var(--sp-2);
+}
+.policyName {
+  display: block;
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.policyMeta {
+  display: flex;
+  flex-wrap: wrap;
+  column-gap: var(--sp-3);
+  color: var(--ink-3);
+  font-size: var(--fs-md);
+}
+.nowrap {
+  white-space: nowrap;
+}
+.faqAnswer {
+  margin: 0;
+  font-size: var(--fs-md);
+  line-height: 1.5;
+}
+.sheetActions {
+  display: grid;
+  gap: var(--sp-2);
+  margin-top: var(--sp-4);
+}

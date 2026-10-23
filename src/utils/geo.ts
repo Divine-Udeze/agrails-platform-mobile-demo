@@ -156,3 +156,15 @@ export function simplifyPath(points: LatLng[], toleranceM: number): LatLng[] {
   }
   return points.filter((_, i) => keep[i])
 }
+
+/** Simplifies a finger/GPS trace into polygon corners, dropping a closing point near the start. */
+export function traceToBoundary(points: LatLng[], toleranceM = 3): LatLng[] {
+  let corners = simplifyPath(points, toleranceM)
+  if (
+    corners.length > 3 &&
+    distanceMeters(corners[0], corners[corners.length - 1]) < 5
+  ) {
+    corners = corners.slice(0, -1)
+  }
+  return corners
+}

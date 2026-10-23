@@ -86,3 +86,224 @@
   color: var(--soil-700);
   font-weight: 600;
 }
+.weather {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  background: linear-gradient(120deg, var(--rain-100), var(--green-100));
+  border-radius: var(--radius);
+  padding: var(--sp-3) var(--sp-4);
+}
+.weatherIcon {
+  color: var(--rain-600);
+}
+.payoutBanner {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  padding: var(--sp-4);
+  border-radius: var(--radius);
+  background: linear-gradient(120deg, var(--gold-500), #f2c45a);
+  color: var(--ink);
+  text-decoration: none;
+  font-weight: 800;
+}
+.alertCard {
+  display: flex;
+  gap: var(--sp-3);
+  padding: var(--sp-4);
+  border-radius: var(--radius);
+  background: var(--warning-bg);
+  color: var(--ink);
+  text-decoration: none;
+  border-left: 6px solid var(--warning);
+}
+.alertCard[data-status='danger'] {
+  background: var(--danger-bg);
+  border-left-color: var(--danger);
+}
+.protect {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-4);
+}
+.sectionHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: var(--sp-5);
+}
+.quickGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--sp-2);
+}
+.quick {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: var(--sp-3) var(--sp-2);
+  background: var(--surface);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  text-decoration: none;
+  color: var(--green-900);
+  font-weight: 700;
+  font-size: var(--fs-sm);
+  text-align: center;
+}
+.quick svg {
+  color: var(--green-700);
+}
+
+.insureLink {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.insureLabel {
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  line-height: 1.25;
+}
+
+.farmHero {
+  display: flex;
+  gap: var(--sp-4);
+  align-items: center;
+  background: linear-gradient(135deg, var(--green-100), var(--soil-100));
+  border-radius: var(--radius-lg);
+  padding: var(--sp-4);
+}
+.facts {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--sp-3);
+}
+.fact {
+  background: var(--surface);
+  border-radius: var(--radius);
+  padding: var(--sp-3);
+}
+.factLabel {
+  color: var(--ink-3);
+  font-size: var(--fs-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.factValue {
+  font-weight: 800;
+}
+.linkRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 56px;
+  padding: 0 var(--sp-4);
+  background: var(--surface);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  text-decoration: none;
+  color: var(--ink);
+  font-weight: 700;
+}
+.linkRow + .linkRow {
+  margin-top: var(--sp-2);
+}
+.progress {
+  height: 8px;
+  border-radius: 999px;
+  background: var(--line);
+  overflow: hidden;
+}
+.progressFill {
+  height: 100%;
+  width: 100%;
+  background: var(--green-500);
+  transform-origin: left;
+  transition: transform 300ms var(--ease);
+}
+.seasonCard {
+  width: 100%;
+  text-align: left;
+  border: 2px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface);
+  padding: var(--sp-4);
+  cursor: pointer;
+}
+.seasonCard[aria-checked='true'] {
+  border-color: var(--green-700);
+  background: var(--green-100);
+}
+.months {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  gap: 3px;
+  margin-top: var(--sp-3);
+}
+.month {
+  text-align: center;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 6px 0;
+  border-radius: 6px;
+  background: var(--bg);
+  color: var(--ink-3);
+}
+.month[data-on='true'] {
+  background: var(--rain-400);
+  color: #fff;
+}
+
+.healthRow {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--sp-4);
+}
+
+.healthLink {
+  display: flex;
+  align-items: center;
+  min-height: 48px;
+  margin-top: var(--sp-2);
+}
+
+.legendRow {
+  display: flex;
+  gap: var(--sp-2);
+  flex-wrap: wrap;
+}
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  background: var(--surface);
+  border-radius: var(--radius);
+  overflow: hidden;
+  box-shadow: var(--shadow);
+}
+.table th,
+.table td {
+  padding: var(--sp-3);
+  height: 48px;
+  text-align: right;
+  border-bottom: 1px solid var(--line);
+}
+.table th:first-child,
+.table td:first-child {
+  text-align: left;
+}
+.table th {
+  font-size: var(--fs-sm);
+  color: var(--ink-3);
+  text-transform: uppercase;
+}
+.table tr[data-bad='true'] td {
+  background: var(--danger-bg);
+  color: var(--danger);
+  font-weight: 700;
+}

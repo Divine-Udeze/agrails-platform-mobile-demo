@@ -1,9 +1,11 @@
 import { lazy, Suspense, useEffect } from 'react'
 import { BrowserRouter, Route, Routes, useLocation } from 'react-router-dom'
+import { ErrorBoundary } from '@/src/components/common/ErrorBoundary'
 import { LoadingState } from '@/src/components/common/ErrorStates'
 import { AppProvider } from '@/src/context/AppContext'
 import NotFound from '@/src/pages/NotFound'
 import { ProtectedRoute } from '@/src/routes/ProtectedRoute'
+import { KeyedByFarm } from '@/src/routes/KeyedByFarm'
 import { PublicRoute } from '@/src/routes/PublicRoute'
 
 const Welcome = lazy(() => import('@/src/pages/onboarding/Welcome'))
@@ -87,8 +89,22 @@ export function AppRoutes() {
           <Route path='/yield-report/:farmId' element={<YieldReport />} />
           <Route path='/insure/:farmId' element={<PlanOptions />} />
           <Route path='/premium-quote/:farmId' element={<PremiumQuote />} />
-          <Route path='/payment/:farmId' element={<Payment />} />
-          <Route path='/confirmation/:farmId' element={<Confirmation />} />
+          <Route
+            path='/payment/:farmId'
+            element={
+              <KeyedByFarm>
+                <Payment />
+              </KeyedByFarm>
+            }
+          />
+          <Route
+            path='/confirmation/:farmId'
+            element={
+              <KeyedByFarm>
+                <Confirmation />
+              </KeyedByFarm>
+            }
+          />
           <Route path='/monitor' element={<MonitorList />} />
           <Route path='/monitor/:farmId' element={<MonitorDetail />} />
           <Route path='/map' element={<AllFarmsMap />} />
@@ -111,7 +127,9 @@ export default function App() {
       <BrowserRouter
         future={{ v7_startTransition: true, v7_relativeSplatPath: true }}
       >
-        <AppRoutes />
+        <ErrorBoundary>
+          <AppRoutes />
+        </ErrorBoundary>
       </BrowserRouter>
     </AppProvider>
   )
