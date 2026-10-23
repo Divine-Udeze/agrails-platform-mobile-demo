@@ -209,6 +209,34 @@ export const en = {
   'quick.size': 'About how big is it?',
   'quick.acres': '{n} acres',
   'quick.acre': '{n} acre',
+  'walk.title': 'Walk around your farm',
+  'walk.ready': 'Go to one corner of your farm, then tap Start walking.',
+  'walk.walking':
+    'Walk along the edge. Tap Finish when you are back where you started.',
+  'walk.waiting': 'Waiting for GPS…',
+  'walk.start': 'Start walking',
+  'walk.finish': 'Finish',
+  'walk.restart': 'Start again',
+  'walk.accuracy': 'GPS accuracy {m} m',
+  'walk.distance': '{m} m walked',
+  'walk.useTap': 'Tap corners instead',
+  'walk.gpsSlow':
+    'GPS is slow to answer. Keep walking, or move to open ground.',
+  'walk.tooFew': 'Walk a little further along the edge, then tap Finish.',
+  'walk.tooSmall':
+    'That area is too small. Keep walking along the edge, then tap Finish.',
+  'walk.tooLarge':
+    'That area is bigger than 50 ha. Check you are walking around one farm, or tap Start again.',
+  'walk.crossed':
+    'Your path crosses itself. Walk back along the edge, or tap Start again.',
+  'walk.restartConfirm': 'Start the walk again?',
+  'walk.restartBody': 'The path you have walked so far will be deleted.',
+  'draw.title': 'Draw your farm',
+  'draw.hint': 'Trace the edge of your farm with one finger.',
+  'draw.mode': 'Map mode',
+  'draw.drawMode': 'Draw',
+  'draw.moveMode': 'Move map',
+  'draw.redraw': 'Draw again',
 }
 
 export type StringKey = keyof typeof en

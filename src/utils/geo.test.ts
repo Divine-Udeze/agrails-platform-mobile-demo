@@ -8,6 +8,7 @@ import {
   polygonAreaHa,
   simplifyPath,
   squareAround,
+  traceToBoundary,
   validateBoundary,
 } from '@/src/utils/geo'
 
@@ -102,4 +103,23 @@ test('boundsOf returns south-west and north-east corners', () => {
     [-1, 35],
     [1, 37],
   ])
+})
+
+test('traceToBoundary turns a dense closed trace into its corners', () => {
+  const corners = squareAround(NAKURU, 1)
+  const loop = [...corners, corners[0]]
+  const dense: LatLng[] = []
+  for (let s = 0; s < 4; s++) {
+    const [a, b] = [loop[s], loop[s + 1]]
+    for (let k = 0; k < 10; k++) {
+      dense.push([
+        a[0] + ((b[0] - a[0]) * k) / 10,
+        a[1] + ((b[1] - a[1]) * k) / 10,
+      ])
+    }
+  }
+  dense.push(corners[0])
+  const result = traceToBoundary(dense, 3)
+  expect(result).toHaveLength(4)
+  expect(polygonAreaHa(result)).toBeCloseTo(1, 1)
 })
